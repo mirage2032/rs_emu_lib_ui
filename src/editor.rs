@@ -8,7 +8,7 @@ use stylance::import_style;
 import_style!(style, "editor.module.scss");
 
 #[component]
-fn Thead(width: usize) -> impl IntoView {
+fn MemThead(width: usize) -> impl IntoView {
     view! {
         <thead>
             <tr>
@@ -35,7 +35,7 @@ fn Thead(width: usize) -> impl IntoView {
 }
 
 #[component]
-fn Tinput(
+fn MemCell(
     index: usize,
     changes_in: ReadSignal<Emulator>,
     changes_out: WriteSignal<Emulator>,
@@ -71,10 +71,10 @@ fn Tinput(
         <input
             class=style::tablecell
             maxlength=2
-            on:change=move |e| {
-                e.target()
-                    .map(|x| {
-                        let element = x.dyn_into::<web_sys::HtmlInputElement>().unwrap();
+            on:change=move |event| {
+                event.target()
+                    .map(|target| {
+                        let element = target.dyn_into::<web_sys::HtmlInputElement>().unwrap();
                         let elem_val = &element.value();
                         let result = s_setval(index, elem_val);
                         match result {
@@ -98,7 +98,7 @@ fn Tinput(
 }
 
 #[component]
-fn Trow(
+fn MemTr(
     y: usize,
     width: usize,
     changes_in: ReadSignal<Emulator>,
@@ -121,7 +121,7 @@ fn Trow(
                         let index = start + i;
                         view! {
                             <th>
-                                <Tinput
+                                <MemCell
                                     index
                                     changes_in=changes_in.clone()
                                     changes_out=changes_out.clone()
@@ -136,7 +136,7 @@ fn Trow(
 }
 
 #[component]
-pub fn Tbody(
+pub fn MemTbody(
     width: usize,
     changes_in: ReadSignal<Emulator>,
     changes_out: WriteSignal<Emulator>,
@@ -147,7 +147,7 @@ pub fn Tbody(
         <tbody>
             {(0..memsize / 100 / width)
                 .map(|y| {
-                    view! { <Trow y=y width=width changes_in=changes_in changes_out=changes_out /> }
+                    view! { <MemTr y=y width=width changes_in=changes_in changes_out=changes_out /> }
                 })
                 .collect_view()}
         </tbody>
@@ -165,8 +165,8 @@ pub fn Editor(
     //style
     view! {
         <table style="table-collapse: collapse; border-spacing: 0;">
-            <Thead width=width />
-            <Tbody width=width changes_in=changes_in changes_out=changes_out />
+            <MemThead width=width />
+            <MemTbody width=width changes_in=changes_in changes_out=changes_out />
         </table>
     }
 }

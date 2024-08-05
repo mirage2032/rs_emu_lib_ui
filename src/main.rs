@@ -1,8 +1,6 @@
 mod app;
 mod editor;
 
-use std::path::PathBuf;
-use emu_lib::memory::MemoryDevice;
 use leptos::*;
 
 fn main() {

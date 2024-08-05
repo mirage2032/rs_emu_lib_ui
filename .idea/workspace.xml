@@ -8,26 +8,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="746bd8cd-b2ad-47af-b031-ab8557aa16fe" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Cargo.lock" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dist/_index-a0daef572a903762.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dist/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dist/style-59f80db3a79f021b.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dist/untitled-e0d33fc68394275a.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dist/untitled-e0d33fc68394275a_bg.wasm" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/editor.module.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/editor.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/css/stylance/_index.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/css/stylance/editor.module-cbdf48c.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/css/style.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/trunk.toml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.gitmodules" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/deps/rs_emu_lib" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Cargo.lock" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/editor.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/editor.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/trunk.toml" beforeDir="false" afterPath="$PROJECT_DIR$/trunk.toml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -59,7 +48,7 @@
   "keyToString": {
     "Attach to Node.js/Chrome.Unnamed.executor": "Debug",
     "Cargo.Run.executor": "Run",
-    "JavaScript Debug.Unnamed JavaScript.executor": "Debug",
+    "JavaScript Debug.Unnamed JavaScript.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.rust.reset.selective.auto.import": "true",
     "git-widget-placeholder": "master",
@@ -129,7 +118,7 @@
       <workItem from="1722792835920" duration="2012000" />
       <workItem from="1722797522949" duration="25165000" />
       <workItem from="1722846129603" duration="2401000" />
-      <workItem from="1722848869378" duration="771000" />
+      <workItem from="1722848869378" duration="17863000" />
     </task>
     <servers />
   </component>
@@ -141,17 +130,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/editor.rs</url>
-          <line>76</line>
-          <option name="timeStamp" value="2" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/editor.rs</url>
-          <line>71</line>
-          <option name="timeStamp" value="3" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/editor.rs</url>
-          <line>38</line>
+          <line>98</line>
           <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>

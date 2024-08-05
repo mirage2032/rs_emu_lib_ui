@@ -10,6 +10,7 @@ debug = true
 debug = true
 
 [dependencies]
+emu_lib = { path = "deps/rs_emu_lib" }
 console_error_panic_hook = "0.1.7"
 leptos = { version = "0.6.13", features = ["csr", "nightly"] }
 stylance = { version="0.5.1", features = ["nightly"] }

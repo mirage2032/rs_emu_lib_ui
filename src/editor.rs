@@ -13,7 +13,7 @@ fn MemThead(width: usize) -> impl IntoView {
         <thead>
             <tr>
                 <th>
-                    <input disabled class=style::tablecell value="" style="width: 5.5ch" />
+                    <input disabled class=style::tablecell value="" style="width: 6.5ch" />
                 </th>
                 {(0..width)
                     .map(|x| {
@@ -37,11 +37,11 @@ fn MemThead(width: usize) -> impl IntoView {
 #[component]
 fn MemCell(
     index: usize,
-    changes_in: ReadSignal<Emulator>,
-    changes_out: WriteSignal<Emulator>,
+    emu_read: ReadSignal<Emulator>,
+    emu_write: WriteSignal<Emulator>,
 ) -> impl IntoView {
     let i_getval = move |index: usize| -> Result<u8, &str> {
-        changes_in.with(|emu| emu.memory.read_8(index as u16))
+        emu_read.with(|emu| emu.memory.read_8(index as u16))
     };
 
     let s_getval = move |index: usize| -> String {
@@ -53,7 +53,7 @@ fn MemCell(
 
     let i_setval = move |index: usize, value: &u8| -> Result<(), &str> {
         let mut result = Err("Mem not written");
-        changes_out.update(|emu: &mut Emulator| {
+        emu_write.update(|emu: &mut Emulator| {
             result = emu.memory.write_8(index as u16, *value);
         });
         result
@@ -72,7 +72,8 @@ fn MemCell(
             class=style::tablecell
             maxlength=2
             on:change=move |event| {
-                event.target()
+                event
+                    .target()
                     .map(|target| {
                         let element = target.dyn_into::<web_sys::HtmlInputElement>().unwrap();
                         let elem_val = &element.value();
@@ -98,11 +99,39 @@ fn MemCell(
 }
 
 #[component]
+fn MemThs(
+    y: usize,
+    width: usize,
+    emu_read: ReadSignal<Emulator>,
+    emu_write: WriteSignal<Emulator>,
+) -> impl IntoView {
+    view! {
+        {
+            let start = y * width;
+            (0..width)
+                .map(|i| {
+                    let index = start + i;
+                    view! {
+                        <th>
+                            <MemCell
+                                index
+                                emu_read
+                                emu_write
+                            />
+                        </th>
+                    }
+                })
+                .collect_view()
+        }
+    }
+}
+
+#[component]
 fn MemTr(
     y: usize,
     width: usize,
-    changes_in: ReadSignal<Emulator>,
-    changes_out: WriteSignal<Emulator>,
+    emu_read: ReadSignal<Emulator>,
+    emu_write: WriteSignal<Emulator>,
 ) -> impl IntoView {
     view! {
         <tr>
@@ -110,27 +139,11 @@ fn MemTr(
                 <input
                     disabled
                     class=style::tablecell
-                    style="width: 5.5ch"
-                    value=format!("0x{:03X}", y)
+                    style="width: 6.5ch"
+                    value=format!("0x{:04X}", y * width)
                 />
             </th>
-            {
-                let start = y * width;
-                (0..width)
-                    .map(|i| {
-                        let index = start + i;
-                        view! {
-                            <th>
-                                <MemCell
-                                    index
-                                    changes_in=changes_in.clone()
-                                    changes_out=changes_out.clone()
-                                />
-                            </th>
-                        }
-                    })
-                    .collect_view()
-            }
+            <MemThs y width emu_read emu_write />
         </tr>
     }
 }
@@ -138,16 +151,22 @@ fn MemTr(
 #[component]
 pub fn MemTbody(
     width: usize,
-    changes_in: ReadSignal<Emulator>,
-    changes_out: WriteSignal<Emulator>,
+    emu_read: ReadSignal<Emulator>,
+    emu_write: WriteSignal<Emulator>,
+    // start: usize,
+    // rows: usize,
 ) -> impl IntoView {
-    let memsize = changes_in.with(|emu| emu.memory.size());
+    let start = 0usize;
+    let rows = 0x10usize;
+    let memsize = emu_read.with(|emu| emu.memory.size());
     log!("Memory size: {}", memsize);
     view! {
         <tbody>
-            {(0..memsize / 100 / width)
+            {(start..memsize.min(start + rows))
                 .map(|y| {
-                    view! { <MemTr y=y width=width changes_in=changes_in changes_out=changes_out /> }
+                    view! {
+                        <MemTr y width emu_read emu_write />
+                    }
                 })
                 .collect_view()}
         </tbody>
@@ -156,17 +175,16 @@ pub fn MemTbody(
 
 #[component]
 pub fn Editor(
-    changes_in: ReadSignal<Emulator>,
-    changes_out: WriteSignal<Emulator>,
+    emu_read: ReadSignal<Emulator>,
+    emu_write: WriteSignal<Emulator>,
 ) -> impl IntoView {
     let width = 0x10;
-    let memsize = changes_in.with(|emu| emu.memory.size());
+    let memsize = emu_read.with(|emu| emu.memory.size());
     log!("Memory size: {}", memsize);
-    //style
     view! {
         <table style="table-collapse: collapse; border-spacing: 0;">
-            <MemThead width=width />
-            <MemTbody width=width changes_in=changes_in changes_out=changes_out />
+            <MemThead width />
+            <MemTbody width emu_read emu_write />
         </table>
     }
 }

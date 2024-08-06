@@ -37,7 +37,8 @@ fn MemThead(width: usize) -> impl IntoView {
 
 #[component]
 fn MemCell(
-    index: usize,
+    //index is a derived usize
+    index: Signal<usize>,
     emu_read: ReadSignal<Emulator>,
     emu_write: WriteSignal<Emulator>,
 ) -> impl IntoView {
@@ -72,28 +73,28 @@ fn MemCell(
         <input
             class=style::tablecell
             maxlength=2
+            value=move || s_getval(index())
             on:change=move |event| {
                 event
                     .target()
-                    .map(move |target| {
+                    .map(|target| {
                         let element = target.dyn_into::<web_sys::HtmlInputElement>().unwrap();
                         let elem_val = &element.value();
-                        let result = s_setval(index, elem_val);
+                        let result = s_setval(index(), elem_val);
                         match result {
                             Ok(_) => {
-                                log!("Saved value: {} at pos: {}", elem_val,index);
+                                log!("Saved value: {} at pos: {}", elem_val,index());
                                 element.set_value(&format!("{}", elem_val));
                             }
                             Err(err) => {
                                 warn!(
-                                    "Error saving value: {} at pos: {} with error: {}", element.value(),index,err
+                                    "Error saving value: {} at pos: {} with error: {}", element.value(),index(),err
                                 );
-                                element.set_value(&s_getval(index));
+                                element.set_value(&s_getval(index()));
                             }
                         }
                     });
             }
-            value=move || s_getval(index)
             style="width: 2.5ch"
         />
     }
@@ -109,13 +110,13 @@ fn MemThs(
 ) -> impl IntoView {
     view! {
         {
-            let start = (offset + address_read() as usize) * width;
+            let start = move || (offset + address_read() as usize) * width;
             (0..width)
                 .map(move |i| {
-                    let index = start + i;
+                    let idx = move || start() + i;
                     view! {
                         <th>
-                            <MemCell index emu_read emu_write />
+                            <MemCell index=Signal::derive(idx) emu_read emu_write />
                         </th>
                     }
                 })
@@ -138,7 +139,7 @@ fn MemTrCounter(
                 <input
                     class=style::tablecell
                     style="width: 6.5ch"
-                    value=format!("{:04X}", address_read())
+                    value=move || format!("{:04X}", address_read())
                     on:change=move |event| {
                         event
                             .target()
@@ -151,7 +152,7 @@ fn MemTrCounter(
                                 match hexval {
                                     Ok(val) => {
                                         let val = val & 0xFFF0;
-                                        log!("Saved value: {}", val);
+                                        log!("Saved value: {:04X}", val/0x10);
                                         address_write(val/0x10);
                                         element.set_value(&format!("{:04X}", val));
                                     }
@@ -183,7 +184,7 @@ fn MemTr(
                     disabled
                     class=style::tablecell
                     style="width: 6.5ch"
-                    value=move || format!("0x{:03X}0", address_read() as usize+offset)
+                    value=move || format!("0x{:04X}", offset * width+address_read()as usize*0x10)
                 />
             </th>
             <MemThs address_read width emu_read emu_write offset />
@@ -219,11 +220,8 @@ pub fn MemTbody(
 }
 
 #[component]
-pub fn Editor(
-    emu_read: ReadSignal<Emulator>,
-    emu_write: WriteSignal<Emulator>,
-) -> impl IntoView {
-    let width = 0x10;
+pub fn Editor(emu_read: ReadSignal<Emulator>, emu_write: WriteSignal<Emulator>) -> impl IntoView {
+    let width = 0x20;
     view! {
         <table style="table-collapse: collapse; border-spacing: 0;">
             <MemThead width />

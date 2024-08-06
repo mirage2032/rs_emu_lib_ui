@@ -3,7 +3,6 @@ use emu_lib::memory::MemoryDevice;
 use leptos::*;
 use leptos::logging::{log, warn};
 use leptos::wasm_bindgen::JsCast;
-use leptos::web_sys::js_sys::Atomics::add;
 use stylance::import_style;
 
 import_style!(style, "editor.module.scss");
@@ -43,7 +42,8 @@ fn MemCell(
     emu_write: WriteSignal<Emulator>,
 ) -> impl IntoView {
     let i_getval = move |index: usize| -> Result<u8, &str> {
-        emu_read.with(|emu| emu.memory.read_8(index as u16))
+        let address = u16::try_from(index).map_err(|_| "Address outside memory range")?;
+        emu_read.with(|emu| emu.memory.read_8(address))
     };
 
     let s_getval = move |index: usize| -> String {
@@ -54,9 +54,11 @@ fn MemCell(
     };
 
     let i_setval = move |index: usize, value: &u8| -> Result<(), &str> {
+        let address = u16::try_from(index).map_err(|_| "Address outside memory range")?;
         let mut result = Err("Mem not written");
+        log!("DBG:Writing to address: {:X} value: {:X}", address, value);
         emu_write.update(|emu: &mut Emulator| {
-            result = emu.memory.write_8(index as u16, *value);
+            result = emu.memory.write_8(address, *value);
         });
         result
     };
@@ -74,28 +76,30 @@ fn MemCell(
             class=style::tablecell
             maxlength=2
             value=move || s_getval(index())
+            style:width="2.5ch"
             on:change=move |event| {
                 event
                     .target()
                     .map(|target| {
                         let element = target.dyn_into::<web_sys::HtmlInputElement>().unwrap();
                         let elem_val = &element.value();
-                        let result = s_setval(index(), elem_val);
+                        let idx = index();
+                        let result = s_setval(idx, elem_val);
                         match result {
                             Ok(_) => {
-                                log!("Saved value: {} at pos: {}", elem_val,index());
+                                log!("Saved value: {} at pos: {}", elem_val,idx);
                                 element.set_value(&format!("{}", elem_val));
                             }
                             Err(err) => {
                                 warn!(
-                                    "Error saving value: {} at pos: {} with error: {}", element.value(),index(),err
+                                    "Error saving value: {} at pos: {} with error: {}", element.value(),idx,err
                                 );
-                                element.set_value(&s_getval(index()));
+                                let real_val = s_getval(idx);
+                                element.set_value(&real_val);
                             }
                         }
                     });
             }
-            style="width: 2.5ch"
         />
     }
 }
@@ -108,17 +112,15 @@ fn MemThs(
     row_start: Signal<usize>,
 ) -> impl IntoView {
     view! {
-        {
-            (0..width)
-                .map(move |i| {
-                    view! {
-                        <th>
-                            <MemCell index=Signal::derive(move|| row_start()+i) emu_read emu_write />
-                        </th>
-                    }
-                })
-                .collect_view()
-        }
+        {(0..width)
+            .map(move |i| {
+                view! {
+                    <th>
+                        <MemCell index=Signal::derive(move || row_start() + i) emu_read emu_write />
+                    </th>
+                }
+            })
+            .collect_view()}
     }
 }
 
@@ -134,8 +136,16 @@ fn MemTrCounter(
         <tr>
             <th>
                 <input
+                    disabled
                     class=style::tablecell
-                    style="width: 6.5ch"
+                    value="0x"
+                    maxlength=4
+                    style:width="2.00ch"
+                />
+
+                <input
+                    class=style::tablecell
+                    style:width="4.5ch"
                     value=move || format!("{:04X}", address_read())
                     on:change=move |event| {
                         event
@@ -148,8 +158,6 @@ fn MemTrCounter(
                                 let hexval = u16::from_str_radix(elem_val, 16);
                                 match hexval {
                                     Ok(val) => {
-                                        // let val = val & 0xFFF0;
-                                        // log!("Saved value: {:04X}", val);
                                         address_write(val);
                                         element.set_value(&format!("{:04X}", val));
                                     }
@@ -162,7 +170,12 @@ fn MemTrCounter(
                     }
                 />
             </th>
-            <MemThs width emu_read emu_write row_start=Signal::derive(move || {address_read() as usize}) />
+            <MemThs
+                width
+                emu_read
+                emu_write
+                row_start=Signal::derive(move || { address_read() as usize })
+            />
         </tr>
     }
 }
@@ -180,11 +193,11 @@ fn MemTr(
                 <input
                     disabled
                     class=style::tablecell
-                    style="width: 6.5ch"
+                    style:width="6.5ch"
                     value=move || format!("0x{:04X}", row_start)
                 />
             </th>
-            <MemThs width emu_read emu_write row_start=Signal::derive(move||row_start) />
+            <MemThs width emu_read emu_write row_start=Signal::derive(move || row_start) />
         </tr>
     }
 }
@@ -199,21 +212,20 @@ pub fn MemTbody(
     let (address_read, address_write) = create_signal(0);
     view! {
         <tbody>
-            <MemTrCounter
-                width
-                emu_read
-                emu_write
-                address_read
-                address_write
-            />
+            <MemTrCounter width emu_read emu_write address_read address_write />
             {
-                let addr_start = move || address_read() as usize+width;
-                let addr_end = move || (emu_read.with(|emu| emu.memory.size()) / width).min(addr_start()+width*rows);
-                move || (addr_start()..addr_end()).step_by(width)
-                .map(|row_start| {
-                    view! { <MemTr width emu_read emu_write row_start/> }
-                })
-                .collect_view()
+                let addr_start = move || address_read() as usize + width;
+                let addr_end = move || {
+                    (emu_read.with(|emu| emu.memory.size())).min(addr_start() + width * rows)
+                };
+                move || {
+                    (addr_start()..addr_end())
+                        .step_by(width)
+                        .map(|row_start| {
+                            view! { <MemTr width emu_read emu_write row_start /> }
+                        })
+                        .collect_view()
+                }
             }
         </tbody>
     }

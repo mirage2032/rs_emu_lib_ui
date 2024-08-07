@@ -5,26 +5,20 @@ use leptos::logging::{log, warn};
 use leptos::wasm_bindgen::JsCast;
 use stylance::import_style;
 
-import_style!(style, "editor.module.scss");
+import_style!(style, "memeditor.module.scss");
 
 #[component]
 fn MemThead(width: usize) -> impl IntoView {
     view! {
         <thead>
             <tr>
-                <th>
-                    <input disabled class=style::tablecell value="" style="width: 6.5ch" />
+                <th class=style::tableleft>
                 </th>
                 {(0..width)
                     .map(move |x| {
                         view! {
-                            <th>
-                                <input
-                                    disabled
-                                    class=style::tablecell
-                                    value=format!("{:X}", x)
-                                    style="width: 2.5ch"
-                                />
+                            <th class=style::tabletop>
+                                <span>{format!("{:X}", x)}</span>
                             </th>
                         }
                     })
@@ -56,7 +50,6 @@ fn MemCell(
     let i_setval = move |index: usize, value: &u8| -> Result<(), &str> {
         let address = u16::try_from(index).map_err(|_| "Address outside memory range")?;
         let mut result = Err("Mem not written");
-        log!("DBG:Writing to address: {:X} value: {:X}", address, value);
         emu_write.update(|emu: &mut Emulator| {
             result = emu.memory.write_8(address, *value);
         });
@@ -73,7 +66,6 @@ fn MemCell(
 
     view! {
         <input
-            class=style::tablecell
             maxlength=2
             value=move || s_getval(index())
             style:width="2.5ch"
@@ -100,6 +92,14 @@ fn MemCell(
                         }
                     });
             }
+            on:click=move |event| {
+                event
+                    .target()
+                    .map(|target| {
+                        let element = target.dyn_into::<web_sys::HtmlInputElement>().unwrap();
+                        element.select();
+                    });
+            }
         />
     }
 }
@@ -115,7 +115,7 @@ fn MemThs(
         {(0..width)
             .map(move |i| {
                 view! {
-                    <th>
+                    <th class=style::tablecell>
                         <MemCell index=Signal::derive(move || row_start() + i) emu_read emu_write />
                     </th>
                 }
@@ -134,18 +134,12 @@ fn MemTrCounter(
 ) -> impl IntoView {
     view! {
         <tr>
-            <th>
+            <th class=style::tableleft>
+                <span>"0x"</span>
                 <input
-                    disabled
-                    class=style::tablecell
-                    value="0x"
+                    class=style::tablecount
+                    style:width="4.2ch"
                     maxlength=4
-                    style:width="2.00ch"
-                />
-
-                <input
-                    class=style::tablecell
-                    style:width="4.5ch"
                     value=move || format!("{:04X}", address_read())
                     on:change=move |event| {
                         event
@@ -189,13 +183,8 @@ fn MemTr(
 ) -> impl IntoView {
     view! {
         <tr>
-            <th>
-                <input
-                    disabled
-                    class=style::tablecell
-                    style:width="6.5ch"
-                    value=move || format!("0x{:04X}", row_start)
-                />
+            <th class=style::tableleft>
+                <span>{format!("0x{:04X}", row_start)}</span>
             </th>
             <MemThs width emu_read emu_write row_start=Signal::derive(move || row_start) />
         </tr>
@@ -232,10 +221,10 @@ pub fn MemTbody(
 }
 
 #[component]
-pub fn Editor(width: usize,rows: usize,
-    emu_read: ReadSignal<Emulator>, emu_write: WriteSignal<Emulator>) -> impl IntoView {
+pub fn MemEditor(width: usize, rows: usize,
+                 emu_read: ReadSignal<Emulator>, emu_write: WriteSignal<Emulator>) -> impl IntoView {
     view! {
-        <table style="table-collapse: collapse; border-spacing: 0;">
+        <table class=style::memtable>
             <MemThead width />
             <MemTbody width rows emu_read emu_write />
         </table>

@@ -1,0 +1,57 @@
+$cl-bg-editable: #a0ff82;
+$cl-bg-static: #01ab70;
+
+$cl-txt: black;
+$cl-border: black;
+$border-size: 2px;
+
+@mixin tablebase {
+  input {
+    border: none;
+    min-height: 1.7em;
+
+    &:focus {
+      outline: none;
+    }
+  }
+}
+
+.memtable {
+  border-collapse: collapse;
+  border: $border-size solid $cl-border;
+}
+
+.tablecell {
+  @include tablebase;
+  border-left: $border-size solid $cl-border;
+  border-bottom: $border-size solid $cl-border;
+  input {
+    text-align: center;
+    background-color: $cl-bg-editable;
+    color: $cl-txt;
+  }
+}
+
+.tableleft {
+  @include tablebase;
+  background-color: $cl-bg-static;
+  border-bottom: $border-size solid $cl-border;
+  input {
+    text-align: left;
+    color: $cl-txt;
+  }
+}
+
+.tablecount {
+  @include tablebase;
+  background-color: $cl-bg-editable;
+}
+
+.tabletop {
+  @include tablebase;
+  background-color: $cl-bg-static;
+  border-left: $border-size solid $cl-border;
+  border-bottom: $border-size solid $cl-border;
+  text-align: center;
+  color: $cl-txt;
+}

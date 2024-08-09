@@ -10,4 +10,4 @@ build-css:
 
 
 build-fmt:
-	leptosfmt ./src/**/*.rs
+	leptosfmt src

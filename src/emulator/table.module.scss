@@ -8,7 +8,7 @@ $border-size: 2px;
 @mixin tablebase {
   input {
     border: none;
-    min-height: 1.7em;
+    //min-height: 1.7em;
 
     &:focus {
       outline: none;
@@ -23,22 +23,29 @@ $border-size: 2px;
 
 .tablecell {
   @include tablebase;
-  border-left: $border-size solid $cl-border;
-  border-bottom: $border-size solid $cl-border;
+  border: $border-size solid $cl-border;
+  text-align: center;
+  background-color: $cl-bg-editable;
+  color: $cl-txt;
+
   input {
-    text-align: center;
-    background-color: $cl-bg-editable;
-    color: $cl-txt;
+    //height: 100%;
+    //padding: 0.1rem;
+    text-align: inherit;
+    background-color: inherit;
+    color: inherit;
   }
 }
 
 .tableleft {
   @include tablebase;
   background-color: $cl-bg-static;
-  border-bottom: $border-size solid $cl-border;
+  border: $border-size solid $cl-border;
+  text-align: left;
+  color: $cl-txt;
   input {
-    text-align: left;
-    color: $cl-txt;
+    text-align: inherit;
+    color: inherit;
   }
 }
 
@@ -50,8 +57,7 @@ $border-size: 2px;
 .tabletop {
   @include tablebase;
   background-color: $cl-bg-static;
-  border-left: $border-size solid $cl-border;
-  border-bottom: $border-size solid $cl-border;
+  border: $border-size solid $cl-border;
   text-align: center;
   color: $cl-txt;
 }

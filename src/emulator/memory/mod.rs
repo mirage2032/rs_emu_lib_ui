@@ -5,15 +5,14 @@ use leptos::logging::{log, warn};
 use leptos::wasm_bindgen::JsCast;
 use stylance::import_style;
 
-import_style!(style, "memeditor.module.scss");
+import_style!(style, "../table.module.scss");
 
 #[component]
 fn MemThead(width: usize) -> impl IntoView {
     view! {
         <thead>
             <tr>
-                <th class=style::tableleft>
-                </th>
+                <th class=style::tableleft></th>
                 {(0..width)
                     .map(move |x| {
                         view! {
@@ -205,7 +204,7 @@ pub fn MemTbody(
             {
                 let addr_start = move || address_read() as usize + width;
                 let addr_end = move || {
-                    (emu_read.with(|emu| emu.memory.size())).min(addr_start() + width * rows)
+                    emu_read.with(|emu| emu.memory.size()).min(addr_start() + width * rows)
                 };
                 move || {
                     (addr_start()..addr_end())

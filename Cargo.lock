@@ -244,6 +244,7 @@ name = "emu_lib"
 version = "0.1.0"
 dependencies = [
  "bitfield-struct",
+ "once_cell",
  "regex",
  "thiserror",
 ]

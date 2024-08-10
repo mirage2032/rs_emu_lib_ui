@@ -223,7 +223,7 @@ pub fn MemTbody(
 pub fn MemEditor(width: usize, rows: usize,
                  emu_read: ReadSignal<Emulator>, emu_write: WriteSignal<Emulator>) -> impl IntoView {
     view! {
-        <table class=style::memtable>
+        <table class=style::table>
             <MemThead width />
             <MemTbody width rows emu_read emu_write />
         </table>

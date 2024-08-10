@@ -61,7 +61,9 @@ pub fn DisasmTr(
                                     .unwrap_or_else(|_| "??".to_string())}
                             </span>
                         </td>
-                        <td class=style::tablecell><span>"N/A"</span></td>
+                        <td class=style::tablecell>
+                            <span>"N/A"</span>
+                        </td>
                     }
                 }
             }}
@@ -117,7 +119,7 @@ pub fn Disassembler(
     emu_write: WriteSignal<Emulator>,
 ) -> impl IntoView {
     view! {
-        <table class=style::memtable>
+        <table class=style::table>
             <DisasmThead />
             <DisasmTbody rows emu_read emu_write />
         </table>

@@ -79,7 +79,7 @@ fn MemCell(
                         match result {
                             Ok(_) => {
                                 log!("Saved value: {} at pos: {}", elem_val,idx);
-                                element.set_value(&format!("{}", elem_val));
+                                element.set_value(&format!("{}", elem_val.to_uppercase()));
                             }
                             Err(err) => {
                                 warn!(

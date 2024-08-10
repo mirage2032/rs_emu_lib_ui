@@ -1,5 +1,9 @@
 use emu_lib::emulator::Emulator;
-use leptos::{CollectView, component, For, IntoView, ReadSignal, Signal, SignalGet, SignalUpdate, SignalWith, view, web_sys, WriteSignal};
+use leptos::{
+    CollectView, component, create_effect, create_node_ref, For, IntoView, ReadSignal,
+    Signal, SignalGet, SignalUpdate, SignalWith, view, web_sys, WriteSignal,
+};
+use leptos::html::Input;
 use leptos::logging::log;
 use leptos::wasm_bindgen::JsCast;
 use stylance::import_style;
@@ -17,6 +21,23 @@ fn GPRegister(
     write_left: impl Fn(u8) -> () + 'static,
     write_right: impl Fn(u8) -> () + 'static,
 ) -> impl IntoView {
+    let full_ref = create_node_ref::<Input>();
+    let left_ref = create_node_ref::<Input>();
+    let right_ref = create_node_ref::<Input>();
+    create_effect(move |_| {
+        full_ref
+            .get()
+            .unwrap()
+            .set_value(&format!("{:04X}", read_full.get()));
+        left_ref
+            .get()
+            .unwrap()
+            .set_value(&format!("{:02X}", read_left.get()));
+        right_ref
+            .get()
+            .unwrap()
+            .set_value(&format!("{:02X}", read_right.get()));
+    });
     view! {
         <table class=style::table>
             <thead>
@@ -33,7 +54,7 @@ fn GPRegister(
                         <input
                             maxlength=4
                             style:width="4.5ch"
-                            value=move || format!("{:04X}", read_full.get())
+                            _ref=full_ref
                             on:change=move |event| {
                                 event
                                     .target()
@@ -66,7 +87,7 @@ fn GPRegister(
                         <input
                             maxlength=2
                             style:width="2.5ch"
-                            value=move || format!("{:02X}", read_left.get())
+                            _ref=left_ref
                             on:change=move |event| {
                                 event
                                     .target()
@@ -93,7 +114,7 @@ fn GPRegister(
                         <input
                             maxlength=2
                             style:width="2.5ch"
-                            value=move || format!("{:02X}", read_right.get())
+                            _ref=right_ref
                             on:change=move |event| {
                                 event
                                     .target()

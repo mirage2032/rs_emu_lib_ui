@@ -1,8 +1,5 @@
 use emu_lib::emulator::Emulator;
-use leptos::{
-    CollectView, component, create_effect, create_node_ref, For, IntoView, ReadSignal,
-    Signal, SignalGet, SignalUpdate, SignalWith, view, web_sys, WriteSignal,
-};
+use leptos::{CollectView, component, create_effect, create_node_ref, create_signal, For, IntoView, ReadSignal, Show, Signal, SignalGet, SignalUpdate, SignalWith, view, web_sys, WriteSignal};
 use leptos::html::Input;
 use leptos::logging::log;
 use leptos::wasm_bindgen::JsCast;
@@ -250,11 +247,50 @@ fn GPAllRegisters(
     emu_write: WriteSignal<Emulator>,
 ) -> impl IntoView {
     let gp_groups = move || emu_read.with(|emu| emu.cpu.registers().gp.len());
+    let (read_current_gp,write_current_gp) = create_signal(0);
     view! {
-        <div>
-            <For each=move || (0..gp_groups()) key=|gp_idx| gp_idx.clone() let:gp_idx>
-                <GPRegisterGroup emu_read=emu_read emu_write=emu_write gp_idx />
+        <div style:display="flex">
+            <Show when=move || { gp_groups() > 1 }>
+                <table class=style::table>
+                    <tr>
+                        <td
+                            class=style::tablebutton
+                            on:click=move |_| {
+                                write_current_gp.update(|val| *val = (*val + 1) % gp_groups());
+                            }
+                            style="vertical-align: middle;text-align:center"
+                        >
+                            <p style:padding="0.1rem">Swap <br />view</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td
+                            class=style::tablebutton
+                            on:click=move |_| {
+                                emu_write
+                                    .update(|emu| {
+                                        let main_gp = emu.cpu.registers_mut().gp[0].clone();
+                                        emu.cpu.registers_mut().gp[0] = emu
+                                            .cpu
+                                            .registers()
+                                            .gp[1]
+                                            .clone();
+                                        emu.cpu.registers_mut().gp[1] = main_gp;
+                                    });
+                            }
+                            style="vertical-align: middle;text-align:center"
+                        >
+                            <p style:padding="0.1rem">Swap <br />content</p>
+                        </td>
+                    </tr>
+                </table>
+            </Show>
+            <For each=move || 0..gp_groups() key=|gp_idx| gp_idx.clone() let:gp_idx>
+                <Show when=move || gp_idx == read_current_gp.get()>
+                    <GPRegisterGroup emu_read=emu_read emu_write=emu_write gp_idx />
+                </Show>
             </For>
+
         </div>
     }
 }

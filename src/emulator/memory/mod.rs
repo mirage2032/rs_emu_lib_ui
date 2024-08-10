@@ -198,23 +198,20 @@ pub fn MemTbody(
     emu_write: WriteSignal<Emulator>,
 ) -> impl IntoView {
     let (address_read, address_write) = create_signal(0);
+    let addr_start = move || address_read() as usize + width;
+    let addr_end = move || {
+        emu_read.with(|emu| emu.memory.size()).min(addr_start() + width * rows)
+    };
     view! {
         <tbody>
             <MemTrCounter width emu_read emu_write address_read address_write />
-            {
-                let addr_start = move || address_read() as usize + width;
-                let addr_end = move || {
-                    emu_read.with(|emu| emu.memory.size()).min(addr_start() + width * rows)
-                };
-                move || {
-                    (addr_start()..addr_end())
-                        .step_by(width)
-                        .map(|row_start| {
-                            view! { <MemTr width emu_read emu_write row_start /> }
-                        })
-                        .collect_view()
-                }
-            }
+            <For
+                each=move || { (addr_start()..addr_end()).step_by(width) }
+                key=|row_start| *row_start
+                let:row_start
+            >
+                <MemTr width emu_read emu_write row_start />
+            </For>
         </tbody>
     }
 }

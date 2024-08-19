@@ -1,6 +1,6 @@
-mod emulator;
-
 use leptos::*;
+
+mod emulator;
 
 fn main() {
     console_error_panic_hook::set_once();

@@ -1,5 +1,6 @@
 $cl-bg-editable: #a7d020;
 $cl-bg-static: #1d33e2;
+$cl-bg-focus: #13cbe7;
 $cl-bg-button: #e50073;
 $cl-bg-button-active: #e5002a;
 
@@ -69,6 +70,22 @@ $border-size: 2px;
   &:active {
     background-color: $cl-bg-button-active;
   }
+}
+
+.tablebuttoninvert {
+  @include tablebase;
+  user-select: none;
+  background-color: $cl-bg-button-active;
+  border: $border-size solid $cl-border;
+  text-align: center;
+  color: $cl-txt;
+  &:active {
+    background-color: $cl-bg-button;
+  }
+}
+
+.colorfocus {
+  background-color: $cl-bg-focus;
 }
 
 .tablecount {

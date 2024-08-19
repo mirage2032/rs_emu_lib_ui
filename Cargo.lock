@@ -1381,6 +1381,7 @@ dependencies = [
  "console_error_panic_hook",
  "emu_lib",
  "leptos",
+ "log",
  "stylance",
 ]
 

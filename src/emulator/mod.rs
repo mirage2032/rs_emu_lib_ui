@@ -1,7 +1,8 @@
-use leptos::{component, create_signal, IntoView, view};
+use leptos::{component, create_signal, view, IntoView};
 
-pub mod memory;
+mod control;
 mod disasm;
+pub mod memory;
 mod registers;
 
 #[component]
@@ -16,6 +17,6 @@ pub fn Emulator() -> impl IntoView {
         <memory::MemEditor emu_read emu_write width=0x10 rows=10 />
         <disasm::Disassembler rows=10 emu_read emu_write />
         <registers::Registers emu_read emu_write />
+        <control::Control emu_read emu_write />
     }
 }
-

@@ -1,8 +1,12 @@
+use emu_lib::cpu::registers::BaseRegister;
 use emu_lib::emulator::Emulator;
-use leptos::{CollectView, component, create_effect, create_node_ref, create_signal, For, IntoView, ReadSignal, Show, Signal, SignalGet, SignalUpdate, SignalWith, view, web_sys, WriteSignal};
-use leptos::html::Input;
+use leptos::html::{table, Input};
 use leptos::logging::log;
 use leptos::wasm_bindgen::JsCast;
+use leptos::{
+    component, create_effect, create_node_ref, create_signal, view, web_sys, CollectView, For,
+    IntoView, ReadSignal, Show, Signal, SignalGet, SignalUpdate, SignalWith, WriteSignal,
+};
 use stylance::import_style;
 
 import_style!(style, "../table.module.scss");
@@ -50,7 +54,7 @@ fn GPRegister(
                     <td colspan=2 class=style::tablecell>
                         <input
                             maxlength=4
-                            style:width="4.5ch"
+                            style:width="6ch"
                             _ref=full_ref
                             on:change=move |event| {
                                 event
@@ -83,7 +87,7 @@ fn GPRegister(
                     <td class=style::tablecell>
                         <input
                             maxlength=2
-                            style:width="2.5ch"
+                            style:width="3ch"
                             _ref=left_ref
                             on:change=move |event| {
                                 event
@@ -110,7 +114,7 @@ fn GPRegister(
                     <td class=style::tablecell>
                         <input
                             maxlength=2
-                            style:width="2.5ch"
+                            style:width="3ch"
                             _ref=right_ref
                             on:change=move |event| {
                                 event
@@ -247,7 +251,7 @@ fn GPAllRegisters(
     emu_write: WriteSignal<Emulator>,
 ) -> impl IntoView {
     let gp_groups = move || emu_read.with(|emu| emu.cpu.registers().gp.len());
-    let (read_current_gp,write_current_gp) = create_signal(0);
+    let (read_current_gp, write_current_gp) = create_signal(0);
     view! {
         <div style:display="flex">
             <Show when=move || { gp_groups() > 1 }>
@@ -296,13 +300,200 @@ fn GPAllRegisters(
 }
 
 #[component]
+pub fn WordRegister(
+    name: &'static str,
+    register_read: Signal<u16>,
+    register_write: impl Fn(u16) -> () + 'static,
+) -> impl IntoView {
+    view! {
+        <table class=style::table>
+            <thead>
+                <tr>
+                    <th class=style::tabletop>{name}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class=style::tablecell>
+                        <input
+                            maxlength=4
+                            style:width="6ch"
+                            value=move || format!("{:04X}", register_read())
+                            on:change=move |event| {
+                                event
+                                    .target()
+                                    .map(|target| {
+                                        let element = target
+                                            .dyn_into::<web_sys::HtmlInputElement>()
+                                            .unwrap();
+                                        let result = u16::from_str_radix(&element.value(), 16);
+                                        match result {
+                                            Ok(val) => {
+                                                register_write(val);
+                                                element.set_value(&format!("{:04X}", val));
+                                            }
+                                            Err(_) => {
+                                                log!("Invalid hex value");
+                                                element.set_value(&format!("{:04X}", register_read()));
+                                            }
+                                        }
+                                    });
+                            }
+                        />
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    }
+}
+
+#[component]
+pub fn PCSPRegisters(
+    emu_read: ReadSignal<Emulator>,
+    emu_write: WriteSignal<Emulator>,
+) -> impl IntoView {
+    view! {
+        <div style:display="flex">
+            <WordRegister
+                name="PC"
+                register_read=Signal::derive(move || emu_read.with(|emu| emu.cpu.registers().pc))
+                register_write=move |val| {
+                    emu_write.update(|emu| emu.cpu.registers_mut().pc = val)
+                }
+            />
+            <WordRegister
+                name="SP"
+                register_read=Signal::derive(move || emu_read.with(|emu| emu.cpu.registers().sp))
+                register_write=move |val| {
+                    emu_write.update(|emu| emu.cpu.registers_mut().sp = val)
+                }
+            />
+        </div>
+    }
+}
+
+#[component]
+pub fn ByteRegister(
+    name: &'static str,
+    register_read: Signal<u8>,
+    register_write: impl Fn(u8) -> () + 'static,
+) -> impl IntoView {
+    view! {
+        <table class=style::table>
+            <tr>
+                <td class=style::tabletop>{name}</td>
+            </tr>
+            <tr>
+                <td class=style::tablecell>
+                    <input
+                        maxlength=2
+                        style:width="3ch"
+                        value=move || format!("{:02X}", register_read())
+                        on:change=move |event| {
+                            event
+                                .target()
+                                .map(|target| {
+                                    let element = target
+                                        .dyn_into::<web_sys::HtmlInputElement>()
+                                        .unwrap();
+                                    let result = u8::from_str_radix(&element.value(), 16);
+                                    match result {
+                                        Ok(val) => {
+                                            register_write(val);
+                                            element.set_value(&format!("{:02X}", val));
+                                        }
+                                        Err(_) => {
+                                            log!("Invalid hex value");
+                                            element.set_value(&format!("{:02X}", register_read()));
+                                        }
+                                    }
+                                });
+                        }
+                    />
+                </td>
+            </tr>
+        </table>
+    }
+}
+
+#[component]
+pub fn OtherRegisters(
+    emu_read: ReadSignal<Emulator>,
+    emu_write: WriteSignal<Emulator>,
+) -> impl IntoView {
+    let mut views = Vec::new();
+    emu_read.with(|emu_rd| {
+        for (name, register) in emu_rd.cpu.registers().other.iter() {
+            let name_deref = *name;
+            match register {
+                BaseRegister::Bit8(val) => {
+                    views.push(view! {
+                        <ByteRegister
+                            name=name
+                            register_read=Signal::derive(move || {
+                                emu_read
+                                    .with(|emu| {
+                                        match emu.cpu.registers().other[name_deref] {
+                                            BaseRegister::Bit8(val) => val,
+                                            _ => unreachable!(),
+                                        }
+                                    })
+                            })
+                            register_write=move |val| {
+                                emu_write
+                                    .update(move |emu| {
+                                        emu.cpu
+                                            .registers_mut()
+                                            .other
+                                            .insert(name_deref, BaseRegister::Bit8(val));
+                                    })
+                            }
+                        />
+                    });
+                }
+                BaseRegister::Bit16(val) => {
+                    views.push(view! {
+                        <WordRegister
+                            name=name
+                            register_read=Signal::derive(move || {
+                                emu_read
+                                    .with(|emu| {
+                                        match emu.cpu.registers().other[name_deref] {
+                                            BaseRegister::Bit16(val) => val,
+                                            _ => unreachable!(),
+                                        }
+                                    })
+                            })
+                            register_write=move |val| {
+                                emu_write
+                                    .update(|emu| {
+                                        emu.cpu
+                                            .registers_mut()
+                                            .other
+                                            .insert(name_deref, BaseRegister::Bit16(val));
+                                    })
+                            }
+                        />
+                    });
+                }
+            }
+        }
+    });
+    view! { <div style:display="flex">{views}</div> }
+}
+
+#[component]
 pub fn Registers(
     emu_read: ReadSignal<Emulator>,
     emu_write: WriteSignal<Emulator>,
 ) -> impl IntoView {
     view! {
         <div>
-            <GPAllRegisters emu_read=emu_read emu_write=emu_write />
+            <GPAllRegisters emu_read emu_write />
+            <div style:display="flex">
+                <PCSPRegisters emu_read emu_write />
+                <OtherRegisters emu_read emu_write />
+            </div>
         </div>
     }
 }

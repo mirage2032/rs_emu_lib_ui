@@ -8,6 +8,6 @@ serve:
 build-css:
 	stylance . --output-dir .\static\css\
 
-
-build-fmt:
+leptos-fmt:
+	cargo fmt
 	leptosfmt src

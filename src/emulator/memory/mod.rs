@@ -1,8 +1,8 @@
 use emu_lib::emulator::Emulator;
 use emu_lib::memory::MemoryDevice;
-use leptos::*;
 use leptos::logging::{log, warn};
 use leptos::wasm_bindgen::JsCast;
+use leptos::*;
 use stylance::import_style;
 
 import_style!(style, "../table.module.scss");
@@ -55,10 +55,13 @@ fn MemCell(
         result
     };
 
-    let s_setval = move |index: usize, value: &str| -> Result<(), &str> {
+    let s_setval = move |index: usize, value: &str| -> Result<u8, &str> {
         let hexval = u8::from_str_radix(value, 16);
         match hexval {
-            Ok(val) => i_setval(index, &val),
+            Ok(val) => {
+                i_setval(index, &val)?;
+                Ok(val)
+            }
             Err(_) => Err("Invalid hex value"),
         }
     };
@@ -77,9 +80,9 @@ fn MemCell(
                         let idx = index();
                         let result = s_setval(idx, elem_val);
                         match result {
-                            Ok(_) => {
+                            Ok(val) => {
                                 log!("Saved value: {} at pos: {}", elem_val,idx);
-                                element.set_value(&format!("{}", elem_val.to_uppercase()));
+                                element.set_value(&format!("{:02X}", val));
                             }
                             Err(err) => {
                                 warn!(
@@ -200,7 +203,9 @@ pub fn MemTbody(
     let (address_read, address_write) = create_signal(0);
     let addr_start = move || address_read() as usize + width;
     let addr_end = move || {
-        emu_read.with(|emu| emu.memory.size()).min(addr_start() + width * rows)
+        emu_read
+            .with(|emu| emu.memory.size())
+            .min(addr_start() + width * rows)
     };
     view! {
         <tbody>
@@ -217,8 +222,12 @@ pub fn MemTbody(
 }
 
 #[component]
-pub fn MemEditor(width: usize, rows: usize,
-                 emu_read: ReadSignal<Emulator>, emu_write: WriteSignal<Emulator>) -> impl IntoView {
+pub fn MemEditor(
+    width: usize,
+    rows: usize,
+    emu_read: ReadSignal<Emulator>,
+    emu_write: WriteSignal<Emulator>,
+) -> impl IntoView {
     view! {
         <table class=style::table>
             <MemThead width />

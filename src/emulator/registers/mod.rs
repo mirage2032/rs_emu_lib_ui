@@ -421,13 +421,14 @@ pub fn OtherRegisters(
     emu_read: ReadSignal<Emulator>,
     emu_write: WriteSignal<Emulator>,
 ) -> impl IntoView {
-    let mut views = Vec::new();
-    emu_read.with(|emu_rd| {
-        for (name, register) in emu_rd.cpu.registers().other.iter() {
-            let name_deref = *name;
-            match register {
-                BaseRegister::Bit8(val) => {
-                    views.push(view! {
+    let views = move || {
+        let mut views = Vec::new();
+        emu_read.with(|emu_rd| {
+            for (name, register) in emu_rd.cpu.registers().other.iter() {
+                let name_deref = *name;
+                match register {
+                    BaseRegister::Bit8(val) => {
+                        views.push(view! {
                         <ByteRegister
                             name=name
                             register_read=Signal::derive(move || {
@@ -450,9 +451,9 @@ pub fn OtherRegisters(
                             }
                         />
                     });
-                }
-                BaseRegister::Bit16(val) => {
-                    views.push(view! {
+                    }
+                    BaseRegister::Bit16(val) => {
+                        views.push(view! {
                         <WordRegister
                             name=name
                             register_read=Signal::derive(move || {
@@ -475,10 +476,12 @@ pub fn OtherRegisters(
                             }
                         />
                     });
+                    }
                 }
             }
-        }
-    });
+        });
+        views
+    };
     view! { <div style:display="flex">{views}</div> }
 }
 

@@ -429,53 +429,53 @@ pub fn OtherRegisters(
                 match register {
                     BaseRegister::Bit8(val) => {
                         views.push(view! {
-                        <ByteRegister
-                            name=name
-                            register_read=Signal::derive(move || {
-                                emu_read
-                                    .with(|emu| {
-                                        match emu.cpu.registers().other[name_deref] {
-                                            BaseRegister::Bit8(val) => val,
-                                            _ => unreachable!(),
-                                        }
-                                    })
-                            })
-                            register_write=move |val| {
-                                emu_write
-                                    .update(move |emu| {
-                                        emu.cpu
-                                            .registers_mut()
-                                            .other
-                                            .insert(name_deref, BaseRegister::Bit8(val));
-                                    })
-                            }
-                        />
-                    });
+                            <ByteRegister
+                                name=name
+                                register_read=Signal::derive(move || {
+                                    emu_read
+                                        .with(|emu| {
+                                            match emu.cpu.registers().other[name_deref] {
+                                                BaseRegister::Bit8(val) => val,
+                                                _ => unreachable!(),
+                                            }
+                                        })
+                                })
+                                register_write=move |val| {
+                                    emu_write
+                                        .update(move |emu| {
+                                            emu.cpu
+                                                .registers_mut()
+                                                .other
+                                                .insert(name_deref, BaseRegister::Bit8(val));
+                                        })
+                                }
+                            />
+                        });
                     }
                     BaseRegister::Bit16(val) => {
                         views.push(view! {
-                        <WordRegister
-                            name=name
-                            register_read=Signal::derive(move || {
-                                emu_read
-                                    .with(|emu| {
-                                        match emu.cpu.registers().other[name_deref] {
-                                            BaseRegister::Bit16(val) => val,
-                                            _ => unreachable!(),
-                                        }
-                                    })
-                            })
-                            register_write=move |val| {
-                                emu_write
-                                    .update(|emu| {
-                                        emu.cpu
-                                            .registers_mut()
-                                            .other
-                                            .insert(name_deref, BaseRegister::Bit16(val));
-                                    })
-                            }
-                        />
-                    });
+                            <WordRegister
+                                name=name
+                                register_read=Signal::derive(move || {
+                                    emu_read
+                                        .with(|emu| {
+                                            match emu.cpu.registers().other[name_deref] {
+                                                BaseRegister::Bit16(val) => val,
+                                                _ => unreachable!(),
+                                            }
+                                        })
+                                })
+                                register_write=move |val| {
+                                    emu_write
+                                        .update(|emu| {
+                                            emu.cpu
+                                                .registers_mut()
+                                                .other
+                                                .insert(name_deref, BaseRegister::Bit16(val));
+                                        })
+                                }
+                            />
+                        });
                     }
                 }
             }

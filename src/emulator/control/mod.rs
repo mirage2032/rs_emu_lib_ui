@@ -1,8 +1,12 @@
-use emu_lib::emulator::Emulator;
+use std::time::Duration;
+use emu_lib::cpu::instruction::BaseInstruction;
+use emu_lib::emulator::{Emulator, StopReason};
 use leptos::wasm_bindgen::closure::Closure;
-use leptos::wasm_bindgen::JsCast;
+use leptos::wasm_bindgen::{JsCast, JsValue};
 use leptos::*;
+use leptos::leptos_dom::helpers::IntervalHandle;
 use stylance::import_style;
+use tokio::time::sleep;
 use web_sys::js_sys;
 
 import_style!(style, "../table.module.scss");
@@ -14,6 +18,38 @@ pub fn Control(emu_read: ReadSignal<Emulator>, emu_write: WriteSignal<Emulator>)
             emu.cpu.set_halted(!emu.cpu.halted());
         });
     };
+    let (running, set_running) = create_signal::<Option<Result<IntervalHandle,JsValue>>>(None);
+    let step = move || {
+        emu_write.update(|emu| {
+            if let Err(e) = emu.step() {
+                log::error!("Error stepping: {}", e);
+                if let Some(Ok(int)) = running.get() {
+                    int.clear();
+                    set_running.set(None);
+                }
+            }
+        });
+    };
+
+
+    let toggle_running = move || {
+        set_running.update(|r| {
+            match r {
+                Some(Ok(int)) => {
+                    int.clear();
+                    *r = None;
+                }
+                _ => {
+                    *r = Some(set_interval_with_handle(
+                        step,
+                        Duration::from_millis(0),
+                    ));
+                }
+            }
+        });
+    };
+
+
     view! {
         <table class=style::table>
             <tr>
@@ -21,17 +57,25 @@ pub fn Control(emu_read: ReadSignal<Emulator>, emu_write: WriteSignal<Emulator>)
                     class=style::tablebutton
                     style:padding="0.3rem"
                     on:click=move |_| {
-                        emu_write
-                            .update(|emu| {
-                                if let Err(e) = emu.step() {
+                        emu_write.update(|emu| {
+                            match emu.step() {
+                                Ok(_) => {}
+                                Err(e) => {
                                     log::error!("Error stepping: {}", e);
                                 }
-                            });
+                            }
+                        });
                     }
                 >
                     Step
                 </th>
-                <th class=style::tablebutton style:padding="0.3rem">
+                <th
+                    class=style::tablebutton
+                    on:click=move |_| {
+                        toggle_running();
+                    }
+                    style:padding="0.3rem"
+                >
                     Run
                 </th>
                 <th
@@ -86,7 +130,8 @@ pub fn Control(emu_read: ReadSignal<Emulator>, emu_write: WriteSignal<Emulator>)
                         id="file-input"
                     />
                     <label for="file-input" style:padding="0.3rem">
-                        Load file</label>
+                        Load file
+                    </label>
                 </th>
             </tr>
         </table>

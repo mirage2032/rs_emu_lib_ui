@@ -81,7 +81,6 @@ fn MemCell(
                         let result = s_setval(idx, elem_val);
                         match result {
                             Ok(val) => {
-                                log!("Saved value: {} at pos: {}", elem_val,idx);
                                 element.set_value(&format!("{:02X}", val));
                             }
                             Err(err) => {

@@ -1,10 +1,10 @@
-use std::time::Duration;
 use emu_lib::cpu::instruction::BaseInstruction;
 use emu_lib::emulator::{Emulator, StopReason};
+use leptos::leptos_dom::helpers::IntervalHandle;
 use leptos::wasm_bindgen::closure::Closure;
 use leptos::wasm_bindgen::{JsCast, JsValue};
 use leptos::*;
-use leptos::leptos_dom::helpers::IntervalHandle;
+use std::time::Duration;
 use stylance::import_style;
 use tokio::time::sleep;
 use web_sys::js_sys;
@@ -18,7 +18,7 @@ pub fn Control(emu_read: ReadSignal<Emulator>, emu_write: WriteSignal<Emulator>)
             emu.cpu.set_halted(!emu.cpu.halted());
         });
     };
-    let (running, set_running) = create_signal::<Option<Result<IntervalHandle,JsValue>>>(None);
+    let (running, set_running) = create_signal::<Option<Result<IntervalHandle, JsValue>>>(None);
     let step = move || {
         emu_write.update(|emu| {
             if let Err(e) = emu.step() {
@@ -31,24 +31,17 @@ pub fn Control(emu_read: ReadSignal<Emulator>, emu_write: WriteSignal<Emulator>)
         });
     };
 
-
     let toggle_running = move || {
-        set_running.update(|r| {
-            match r {
-                Some(Ok(int)) => {
-                    int.clear();
-                    *r = None;
-                }
-                _ => {
-                    *r = Some(set_interval_with_handle(
-                        step,
-                        Duration::from_millis(0),
-                    ));
-                }
+        set_running.update(|r| match r {
+            Some(Ok(int)) => {
+                int.clear();
+                *r = None;
+            }
+            _ => {
+                *r = Some(set_interval_with_handle(step, Duration::from_millis(0)));
             }
         });
     };
-
 
     view! {
         <table class=style::table>

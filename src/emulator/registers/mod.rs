@@ -1,6 +1,8 @@
 use emu_lib::cpu::registers::BaseRegister;
+use emu_lib::cpu::z80::Z80;
+use emu_lib::cpu::Cpu;
 use emu_lib::emulator::Emulator;
-use leptos::html::{table, Input};
+use leptos::html::Input;
 use leptos::logging::log;
 use leptos::wasm_bindgen::JsCast;
 use leptos::{
@@ -145,8 +147,8 @@ fn GPRegister(
 }
 #[component]
 fn GPRegisterGroup(
-    emu_read: ReadSignal<Emulator>,
-    emu_write: WriteSignal<Emulator>,
+    emu_read: ReadSignal<Emulator<Z80>>,
+    emu_write: WriteSignal<Emulator<Z80>>,
     gp_idx: usize,
 ) -> impl IntoView {
     view! {
@@ -247,8 +249,8 @@ fn GPRegisterGroup(
 }
 #[component]
 fn GPAllRegisters(
-    emu_read: ReadSignal<Emulator>,
-    emu_write: WriteSignal<Emulator>,
+    emu_read: ReadSignal<Emulator<Z80>>,
+    emu_write: WriteSignal<Emulator<Z80>>,
 ) -> impl IntoView {
     let gp_groups = move || emu_read.with(|emu| emu.cpu.registers().gp.len());
     let (read_current_gp, write_current_gp) = create_signal(0);
@@ -349,8 +351,8 @@ pub fn WordRegister(
 
 #[component]
 pub fn PCSPRegisters(
-    emu_read: ReadSignal<Emulator>,
-    emu_write: WriteSignal<Emulator>,
+    emu_read: ReadSignal<Emulator<Z80>>,
+    emu_write: WriteSignal<Emulator<Z80>>,
 ) -> impl IntoView {
     view! {
         <div style:display="flex">
@@ -418,8 +420,8 @@ pub fn ByteRegister(
 
 #[component]
 pub fn OtherRegisters(
-    emu_read: ReadSignal<Emulator>,
-    emu_write: WriteSignal<Emulator>,
+    emu_read: ReadSignal<Emulator<Z80>>,
+    emu_write: WriteSignal<Emulator<Z80>>,
 ) -> impl IntoView {
     let views = move || {
         let mut views = Vec::new();
@@ -487,8 +489,8 @@ pub fn OtherRegisters(
 
 #[component]
 pub fn Registers(
-    emu_read: ReadSignal<Emulator>,
-    emu_write: WriteSignal<Emulator>,
+    emu_read: ReadSignal<Emulator<Z80>>,
+    emu_write: WriteSignal<Emulator<Z80>>,
 ) -> impl IntoView {
     view! {
         <div>

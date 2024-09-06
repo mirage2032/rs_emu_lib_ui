@@ -1,3 +1,5 @@
+use emu_lib::cpu::z80::Z80;
+use emu_lib::cpu::Cpu;
 use emu_lib::emulator::Emulator;
 use emu_lib::memory::MemoryDevice;
 use leptos::logging::log;
@@ -9,8 +11,8 @@ import_style!(style, "../table.module.scss");
 
 #[component]
 pub fn FollowPCSwitch(
-    emu_read: ReadSignal<Emulator>,
-    emu_write: WriteSignal<Emulator>,
+    emu_read: ReadSignal<Emulator<Z80>>,
+    emu_write: WriteSignal<Emulator<Z80>>,
     start_pos_read: ReadSignal<Option<u16>>,
     start_pos_write: WriteSignal<Option<u16>>,
 ) -> impl IntoView {
@@ -97,8 +99,8 @@ pub fn DisasmThead() -> impl IntoView {
 pub fn DisasmTr(
     address: u16,
     instruction: Result<Box<dyn emu_lib::cpu::instruction::BaseInstruction>, String>,
-    emu_read: ReadSignal<Emulator>,
-    emu_write: WriteSignal<Emulator>,
+    emu_read: ReadSignal<Emulator<Z80>>,
+    emu_write: WriteSignal<Emulator<Z80>>,
 ) -> impl IntoView {
     let elem_class = move || match emu_read.with(|emu| emu.cpu.registers().pc == address) {
         true => classes! {
@@ -151,8 +153,8 @@ pub fn DisasmTr(
 #[component]
 pub fn DisasmTbody(
     rows: usize,
-    emu_read: ReadSignal<Emulator>,
-    emu_write: WriteSignal<Emulator>,
+    emu_read: ReadSignal<Emulator<Z80>>,
+    emu_write: WriteSignal<Emulator<Z80>>,
     start_pos_read: ReadSignal<Option<u16>>,
 ) -> impl IntoView {
     view! {
@@ -195,8 +197,8 @@ pub fn DisasmTbody(
 #[component]
 pub fn Disassembler(
     rows: usize,
-    emu_read: ReadSignal<Emulator>,
-    emu_write: WriteSignal<Emulator>,
+    emu_read: ReadSignal<Emulator<Z80>>,
+    emu_write: WriteSignal<Emulator<Z80>>,
 ) -> impl IntoView {
     let (start_pos_read, start_pos_write) = create_signal(None);
     view! {

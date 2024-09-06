@@ -1,4 +1,6 @@
 use emu_lib::cpu::instruction::BaseInstruction;
+use emu_lib::cpu::z80::Z80;
+use emu_lib::cpu::Cpu;
 use emu_lib::emulator::{Emulator, StopReason};
 use leptos::leptos_dom::helpers::IntervalHandle;
 use leptos::wasm_bindgen::closure::Closure;
@@ -11,7 +13,10 @@ use web_sys::js_sys;
 
 import_style!(style, "../table.module.scss");
 #[component]
-pub fn Control(emu_read: ReadSignal<Emulator>, emu_write: WriteSignal<Emulator>) -> impl IntoView {
+pub fn Control(
+    emu_read: ReadSignal<Emulator<Z80>>,
+    emu_write: WriteSignal<Emulator<Z80>>,
+) -> impl IntoView {
     let halted = move || emu_read.with(|emu| emu.cpu.halted());
     let switch_halt = move || {
         emu_write.update(|emu| {
@@ -50,14 +55,15 @@ pub fn Control(emu_read: ReadSignal<Emulator>, emu_write: WriteSignal<Emulator>)
                     class=style::tablebutton
                     style:padding="0.3rem"
                     on:click=move |_| {
-                        emu_write.update(|emu| {
-                            match emu.step() {
-                                Ok(_) => {}
-                                Err(e) => {
-                                    log::error!("Error stepping: {}", e);
+                        emu_write
+                            .update(|emu| {
+                                match emu.step() {
+                                    Ok(_) => {}
+                                    Err(e) => {
+                                        log::error!("Error stepping: {}", e);
+                                    }
                                 }
-                            }
-                        });
+                            });
                     }
                 >
                     Step

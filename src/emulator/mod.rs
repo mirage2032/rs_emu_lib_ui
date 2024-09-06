@@ -7,8 +7,9 @@ mod registers;
 
 #[component]
 pub fn Emulator() -> impl IntoView {
-    let mut emulator = emu_lib::emulator::Emulator::new(emu_lib::cpu::CPUType::Z80);
-    let rom_data = include_bytes!("../../deps/rs_emu_lib/emu_cli/roms/fib.bin");
+    let mut emulator: emu_lib::emulator::Emulator<emu_lib::cpu::z80::Z80> =
+        emu_lib::emulator::Emulator::new();
+    let rom_data = include_bytes!("../../deps/rs_emu_lib/emu_cli/roms/color.bin");
     // let test = "AAAAAAAABBBBBBBBCCCCCCCCDDDDDDDDEEEEEEEEFFFFFFFFGGGGGGGGHHHHHHHHIIIIIIII".to_string();//.repeat(5);
     // emulator.memory.load(test.as_bytes()).unwrap();
     emulator.memory.load(rom_data).unwrap();

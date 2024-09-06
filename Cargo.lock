@@ -290,6 +290,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "emu_lib_ui"
+version = "0.1.0"
+dependencies = [
+ "console_error_panic_hook",
+ "emu_lib",
+ "leptos",
+ "log",
+ "stylance",
+ "tokio",
+ "web-sys",
+]
+
+[[package]]
 name = "equivalent"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1465,19 +1478,6 @@ name = "unicode-xid"
 version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f962df74c8c05a667b5ee8bcf162993134c104e96440b663c8daa176dc772d8c"
-
-[[package]]
-name = "untitled"
-version = "0.1.0"
-dependencies = [
- "console_error_panic_hook",
- "emu_lib",
- "leptos",
- "log",
- "stylance",
- "tokio",
- "web-sys",
-]
 
 [[package]]
 name = "url"

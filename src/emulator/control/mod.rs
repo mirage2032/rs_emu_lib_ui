@@ -13,9 +13,9 @@ use web_sys::js_sys;
 
 import_style!(style, "../table.module.scss");
 #[component]
-pub fn Control(
-    emu_read: ReadSignal<Emulator<Z80>>,
-    emu_write: WriteSignal<Emulator<Z80>>,
+pub fn Control<T:Cpu+Default+'static>(
+    emu_read: ReadSignal<Emulator<T>>,
+    emu_write: WriteSignal<Emulator<T>>,
 ) -> impl IntoView {
     let halted = move || emu_read.with(|emu| emu.cpu.halted());
     let switch_halt = move || {

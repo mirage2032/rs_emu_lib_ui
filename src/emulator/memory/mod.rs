@@ -1,3 +1,4 @@
+use emu_lib::cpu::Cpu;
 use emu_lib::cpu::z80::Z80;
 use emu_lib::emulator::Emulator;
 use emu_lib::memory::MemoryDevice;
@@ -29,11 +30,11 @@ fn MemThead(width: usize) -> impl IntoView {
 }
 
 #[component]
-fn MemCell(
+fn MemCell<T:Cpu+Default+'static>(
     //index is a derived usize
     index: Signal<usize>,
-    emu_read: ReadSignal<Emulator<Z80>>,
-    emu_write: WriteSignal<Emulator<Z80>>,
+    emu_read: ReadSignal<Emulator<T>>,
+    emu_write: WriteSignal<Emulator<T>>,
 ) -> impl IntoView {
     let i_getval = move |index: usize| -> Result<u8, &str> {
         let address = u16::try_from(index).map_err(|_| "Address outside memory range")?;
@@ -50,7 +51,7 @@ fn MemCell(
     let i_setval = move |index: usize, value: &u8| -> Result<(), &str> {
         let address = u16::try_from(index).map_err(|_| "Address outside memory range")?;
         let mut result = Err("Mem not written");
-        emu_write.update(|emu: &mut Emulator<Z80>| {
+        emu_write.update(|emu: &mut Emulator<T>| {
             result = emu.memory.write_8(address, *value);
         });
         result
@@ -107,10 +108,10 @@ fn MemCell(
 }
 
 #[component]
-fn MemThs(
+fn MemThs<T:Cpu+Default+'static>(
     width: usize,
-    emu_read: ReadSignal<Emulator<Z80>>,
-    emu_write: WriteSignal<Emulator<Z80>>,
+    emu_read: ReadSignal<Emulator<T>>,
+    emu_write: WriteSignal<Emulator<T>>,
     row_start: Signal<usize>,
 ) -> impl IntoView {
     view! {
@@ -127,10 +128,10 @@ fn MemThs(
 }
 
 #[component]
-fn MemTrCounter(
+fn MemTrCounter<T:Cpu+Default+'static>(
     width: usize,
-    emu_read: ReadSignal<Emulator<Z80>>,
-    emu_write: WriteSignal<Emulator<Z80>>,
+    emu_read: ReadSignal<Emulator<T>>,
+    emu_write: WriteSignal<Emulator<T>>,
     address_read: ReadSignal<u16>,
     address_write: WriteSignal<u16>,
 ) -> impl IntoView {
@@ -177,10 +178,10 @@ fn MemTrCounter(
 }
 
 #[component]
-fn MemTr(
+fn MemTr<T:Cpu+Default+'static>(
     width: usize,
-    emu_read: ReadSignal<Emulator<Z80>>,
-    emu_write: WriteSignal<Emulator<Z80>>,
+    emu_read: ReadSignal<Emulator<T>>,
+    emu_write: WriteSignal<Emulator<T>>,
     row_start: usize,
 ) -> impl IntoView {
     view! {
@@ -194,11 +195,11 @@ fn MemTr(
 }
 
 #[component]
-pub fn MemTbody(
+pub fn MemTbody<T:Cpu+Default+'static>(
     width: usize,
     rows: usize,
-    emu_read: ReadSignal<Emulator<Z80>>,
-    emu_write: WriteSignal<Emulator<Z80>>,
+    emu_read: ReadSignal<Emulator<T>>,
+    emu_write: WriteSignal<Emulator<T>>,
 ) -> impl IntoView {
     let (address_read, address_write) = create_signal(0);
     let addr_start = move || address_read() as usize + width;
@@ -222,11 +223,11 @@ pub fn MemTbody(
 }
 
 #[component]
-pub fn MemEditor(
+pub fn MemEditor<T:Cpu+Default+'static>(
     width: usize,
     rows: usize,
-    emu_read: ReadSignal<Emulator<Z80>>,
-    emu_write: WriteSignal<Emulator<Z80>>,
+    emu_read: ReadSignal<Emulator<T>>,
+    emu_write: WriteSignal<Emulator<T>>,
 ) -> impl IntoView {
     view! {
         <table class=style::table>

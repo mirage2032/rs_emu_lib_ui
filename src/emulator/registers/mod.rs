@@ -146,9 +146,9 @@ fn GPRegister(
     }
 }
 #[component]
-fn GPRegisterGroup(
-    emu_read: ReadSignal<Emulator<Z80>>,
-    emu_write: WriteSignal<Emulator<Z80>>,
+fn GPRegisterGroup<T:Cpu+Default+'static>(
+    emu_read: ReadSignal<Emulator<T>>,
+    emu_write: WriteSignal<Emulator<T>>,
     gp_idx: usize,
 ) -> impl IntoView {
     view! {
@@ -248,9 +248,9 @@ fn GPRegisterGroup(
     }
 }
 #[component]
-fn GPAllRegisters(
-    emu_read: ReadSignal<Emulator<Z80>>,
-    emu_write: WriteSignal<Emulator<Z80>>,
+fn GPAllRegisters<T:Cpu+Default+'static>(
+    emu_read: ReadSignal<Emulator<T>>,
+    emu_write: WriteSignal<Emulator<T>>,
 ) -> impl IntoView {
     let gp_groups = move || emu_read.with(|emu| emu.cpu.registers().gp.len());
     let (read_current_gp, write_current_gp) = create_signal(0);
@@ -350,9 +350,9 @@ pub fn WordRegister(
 }
 
 #[component]
-pub fn PCSPRegisters(
-    emu_read: ReadSignal<Emulator<Z80>>,
-    emu_write: WriteSignal<Emulator<Z80>>,
+pub fn PCSPRegisters<T:Cpu+Default+'static>(
+    emu_read: ReadSignal<Emulator<T>>,
+    emu_write: WriteSignal<Emulator<T>>,
 ) -> impl IntoView {
     view! {
         <div style:display="flex">
@@ -419,9 +419,9 @@ pub fn ByteRegister(
 }
 
 #[component]
-pub fn OtherRegisters(
-    emu_read: ReadSignal<Emulator<Z80>>,
-    emu_write: WriteSignal<Emulator<Z80>>,
+pub fn OtherRegisters<T:Cpu+Default+'static>(
+    emu_read: ReadSignal<Emulator<T>>,
+    emu_write: WriteSignal<Emulator<T>>,
 ) -> impl IntoView {
     let views = move || {
         let mut views = Vec::new();
@@ -488,9 +488,9 @@ pub fn OtherRegisters(
 }
 
 #[component]
-pub fn Registers(
-    emu_read: ReadSignal<Emulator<Z80>>,
-    emu_write: WriteSignal<Emulator<Z80>>,
+pub fn Registers<T:Cpu+Default+'static>(
+    emu_read: ReadSignal<Emulator<T>>,
+    emu_write: WriteSignal<Emulator<T>>,
 ) -> impl IntoView {
     view! {
         <div>

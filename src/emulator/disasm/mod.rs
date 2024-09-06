@@ -10,9 +10,9 @@ use stylance::{classes, import_style};
 import_style!(style, "../table.module.scss");
 
 #[component]
-pub fn FollowPCSwitch(
-    emu_read: ReadSignal<Emulator<Z80>>,
-    emu_write: WriteSignal<Emulator<Z80>>,
+pub fn FollowPCSwitch<T:Cpu+Default+'static>(
+    emu_read: ReadSignal<Emulator<T>>,
+    emu_write: WriteSignal<Emulator<T>>,
     start_pos_read: ReadSignal<Option<u16>>,
     start_pos_write: WriteSignal<Option<u16>>,
 ) -> impl IntoView {
@@ -96,11 +96,11 @@ pub fn DisasmThead() -> impl IntoView {
 }
 
 #[component]
-pub fn DisasmTr(
+pub fn DisasmTr<T:Cpu+Default+'static>(
     address: u16,
     instruction: Result<Box<dyn emu_lib::cpu::instruction::BaseInstruction>, String>,
-    emu_read: ReadSignal<Emulator<Z80>>,
-    emu_write: WriteSignal<Emulator<Z80>>,
+    emu_read: ReadSignal<Emulator<T>>,
+    emu_write: WriteSignal<Emulator<T>>,
 ) -> impl IntoView {
     let elem_class = move || match emu_read.with(|emu| emu.cpu.registers().pc == address) {
         true => classes! {
@@ -151,10 +151,10 @@ pub fn DisasmTr(
 }
 
 #[component]
-pub fn DisasmTbody(
+pub fn DisasmTbody<T:Cpu+Default+'static>(
     rows: usize,
-    emu_read: ReadSignal<Emulator<Z80>>,
-    emu_write: WriteSignal<Emulator<Z80>>,
+    emu_read: ReadSignal<Emulator<T>>,
+    emu_write: WriteSignal<Emulator<T>>,
     start_pos_read: ReadSignal<Option<u16>>,
 ) -> impl IntoView {
     view! {
@@ -195,10 +195,10 @@ pub fn DisasmTbody(
 }
 
 #[component]
-pub fn Disassembler(
+pub fn Disassembler<T:Cpu+Default+'static>(
     rows: usize,
-    emu_read: ReadSignal<Emulator<Z80>>,
-    emu_write: WriteSignal<Emulator<Z80>>,
+    emu_read: ReadSignal<Emulator<T>>,
+    emu_write: WriteSignal<Emulator<T>>,
 ) -> impl IntoView {
     let (start_pos_read, start_pos_write) = create_signal(None);
     view! {

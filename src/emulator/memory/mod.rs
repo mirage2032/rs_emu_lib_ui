@@ -29,7 +29,7 @@ fn MemThead(width: usize) -> impl IntoView {
 }
 
 #[component]
-fn MemCell<T: Cpu + Default + 'static>(
+fn MemCell<T: Cpu + 'static>(
     index: Signal<usize>,
     emu_read: ReadSignal<Emulator<T>>,
     emu_write: WriteSignal<Emulator<T>>,
@@ -94,7 +94,7 @@ fn MemCell<T: Cpu + Default + 'static>(
 }
 
 #[component]
-fn MemThs<T: Cpu + Default + 'static>(
+fn MemThs<T: Cpu + 'static>(
     width: usize,
     emu_read: ReadSignal<Emulator<T>>,
     emu_write: WriteSignal<Emulator<T>>,
@@ -114,7 +114,7 @@ fn MemThs<T: Cpu + Default + 'static>(
 }
 
 #[component]
-fn MemTrCounter<T: Cpu + Default + 'static>(
+fn MemTrCounter<T: Cpu + 'static>(
     width: usize,
     emu_read: ReadSignal<Emulator<T>>,
     emu_write: WriteSignal<Emulator<T>>,
@@ -164,7 +164,7 @@ fn MemTrCounter<T: Cpu + Default + 'static>(
 }
 
 #[component]
-fn MemTr<T: Cpu + Default + 'static>(
+fn MemTr<T: Cpu + 'static>(
     width: usize,
     emu_read: ReadSignal<Emulator<T>>,
     emu_write: WriteSignal<Emulator<T>>,
@@ -181,7 +181,7 @@ fn MemTr<T: Cpu + Default + 'static>(
 }
 
 #[component]
-pub fn MemTbody<T: Cpu + Default + 'static>(
+pub fn MemTbody<T: Cpu + 'static>(
     width: usize,
     rows: usize,
     emu_read: ReadSignal<Emulator<T>>,
@@ -209,14 +209,15 @@ pub fn MemTbody<T: Cpu + Default + 'static>(
 }
 
 #[component]
-pub fn MemEditor<T: Cpu + Default + 'static>(
+pub fn MemEditor<T: Cpu + 'static>(
     width: usize,
     rows: usize,
     emu_read: ReadSignal<Emulator<T>>,
     emu_write: WriteSignal<Emulator<T>>,
 ) -> impl IntoView {
     view! {
-        <table class=style::table>
+        <table
+            style:width="100%" class=style::table>
             <MemThead width />
             <MemTbody width rows emu_read emu_write />
         </table>

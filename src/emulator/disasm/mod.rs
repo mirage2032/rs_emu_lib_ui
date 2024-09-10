@@ -8,7 +8,7 @@ use leptos::*;
 use stylance::classes;
 
 #[component]
-pub fn FollowPCSwitch<T: Cpu + Default + 'static>(
+pub fn FollowPCSwitch<T: Cpu + 'static>(
     emu_read: ReadSignal<Emulator<T>>,
     start_pos_read: ReadSignal<Option<u16>>,
     start_pos_write: WriteSignal<Option<u16>>,
@@ -93,7 +93,7 @@ pub fn DisasmThead() -> impl IntoView {
 }
 
 #[component]
-pub fn DisasmTr<T: Cpu + Default + 'static>(
+pub fn DisasmTr<T: Cpu + 'static>(
     address: u16,
     instruction: Result<Box<dyn emu_lib::cpu::instruction::ExecutableInstruction<T>>, String>,
     emu_read: ReadSignal<Emulator<T>>,
@@ -138,7 +138,7 @@ pub fn DisasmTr<T: Cpu + Default + 'static>(
                             </span>
                         </td>
                         <td class=style::tablecell>
-                            <span>"N/A"</span>
+                            <span>"UNKNOWN"</span>
                         </td>
                     }
                 }
@@ -148,7 +148,7 @@ pub fn DisasmTr<T: Cpu + Default + 'static>(
 }
 
 #[component]
-pub fn DisasmTbody<T: Cpu + Default + 'static>(
+pub fn DisasmTbody<T: Cpu + 'static>(
     rows: usize,
     emu_read: ReadSignal<Emulator<T>>,
     emu_write: WriteSignal<Emulator<T>>,
@@ -192,7 +192,7 @@ pub fn DisasmTbody<T: Cpu + Default + 'static>(
 }
 
 #[component]
-pub fn Disassembler<T: Cpu + Default + 'static>(
+pub fn Disassembler<T: Cpu + 'static>(
     rows: usize,
     emu_read: ReadSignal<Emulator<T>>,
     emu_write: WriteSignal<Emulator<T>>,

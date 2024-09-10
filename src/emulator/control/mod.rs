@@ -10,21 +10,31 @@ use std::time::Duration;
 use web_sys::js_sys;
 
 #[component]
-pub fn Control<T: Cpu + Default + 'static>(
+pub fn Control<T: Cpu + 'static>(
     emu_read: ReadSignal<Emulator<T>>,
     emu_write: WriteSignal<Emulator<T>>,
 ) -> impl IntoView {
-    let halted = move || emu_read.with(|emu| emu.cpu.halted());
+    let halted_class = move || emu_read.with(|emu| match emu.cpu.halted(){
+        true => style::tablebuttoninvert,
+        false => style::tablebutton,
+    });
     let switch_halt = move || {
         emu_write.update(|emu| {
             emu.cpu.set_halted(!emu.cpu.halted());
         });
     };
     let (running, set_running) = create_signal::<Option<Result<IntervalHandle, JsValue>>>(None);
+    let run_class = move || {
+        if let Some(Ok(_)) = running.get() {
+            style::tablebuttoninvert
+        } else {
+            style::tablebutton
+        }
+    };
     let step = move || {
         emu_write.update(|emu| {
             if let Err(e) = emu.run_ticks(
-                100.0,
+                10.0,
                 &None as &Option<fn(&mut _, &dyn ExecutableInstruction<_>)>,
             ) {
                 log::error!("Error stepping: {:?}", e);
@@ -49,7 +59,7 @@ pub fn Control<T: Cpu + Default + 'static>(
     };
 
     view! {
-        <table class=style::table>
+        <table style:width="100%" class=style::table>
             <tr>
                 <th
                     class=style::tablebutton
@@ -69,7 +79,7 @@ pub fn Control<T: Cpu + Default + 'static>(
                     Step
                 </th>
                 <th
-                    class=style::tablebutton
+                    class=run_class
                     on:click=move |_| {
                         toggle_running();
                     }
@@ -79,9 +89,7 @@ pub fn Control<T: Cpu + Default + 'static>(
                 </th>
                 <th
                     style:padding="0.3rem"
-                    class=move || {
-                        if halted() { style::tablebuttoninvert } else { style::tablebutton }
-                    }
+                    class=halted_class
                     on:click=move |_| {
                         switch_halt();
                     }

@@ -9,7 +9,17 @@ use web_sys::HtmlInputElement;
 use std::borrow::BorrowMut;
 
 #[component]
-fn MemThead(width: usize) -> impl IntoView {
+fn MemThead(width: usize, address_read: ReadSignal<u16>,) -> impl IntoView {
+    let suffix = move |offset: u16| {
+        let address: u16 = address_read();
+        if offset > (0x10-(address & 0x00FF)) {
+            let offset = (address & 0x00FF) + offset;
+            format!("{:02X}",offset)
+        } else {
+            let offset = (address & 0x00FF) + offset;
+            format!("{:01X}",offset)
+        }
+    };
     view! {
         <thead>
             <tr>
@@ -17,8 +27,8 @@ fn MemThead(width: usize) -> impl IntoView {
                 {(0..width)
                     .map(move |x| {
                         view! {
-                            <th class=style::tabletop>
-                                <span>{format!("{:X}", x)}</span>
+                            <th class=style::tabletop style:min-width="2.5ch">
+                                <span>{move || suffix(x as u16)}</span>
                             </th>
                         }
                     })
@@ -35,18 +45,24 @@ fn MemCell<T: Cpu + 'static>(
     emu_write: WriteSignal<Emulator<T>>,
 ) -> impl IntoView {
     let i_getval = move || -> Result<u8, &str> {
+        if index() >= emu_read.with(|emu| emu.memory.size()) {
+            return Err("??");
+        }
         emu_read.with(|emu| emu.memory.read_8(index() as u16))
     };
 
     let s_getval = move || -> String {
         match i_getval() {
             Ok(val) => format!("{:02X}", val),
-            Err(_) => "??".to_string(),
+            Err(msg) => msg.to_string(),
         }
     };
 
     let i_setval = move |value: &u8| -> Result<(), &str> {
-        let mut result = Err("Mem not written");
+        if index() > u16::MAX as usize {
+            return Err("Index out of bounds");
+        }
+        let mut result = Err("Unknown error");
         emu_write.update(|emu: &mut Emulator<T>| {
             result = emu.memory.write_8(index() as u16 , *value);
         });
@@ -123,11 +139,11 @@ fn MemTrCounter<T: Cpu + 'static>(
 ) -> impl IntoView {
     view! {
         <tr>
-            <th class=style::tableleft>
+            <th class=style::tableleft style:display="flex" style:border="none">
                 <span>"0x"</span>
                 <input
                     class=style::tablecount
-                    style:width="4.2ch"
+                    style:width="4.5ch"
                     maxlength=4
                     prop:value=move || format!("{:04X}", address_read())
                     on:change=move |event| {
@@ -186,8 +202,9 @@ pub fn MemTbody<T: Cpu + 'static>(
     rows: usize,
     emu_read: ReadSignal<Emulator<T>>,
     emu_write: WriteSignal<Emulator<T>>,
+    address_read: ReadSignal<u16>,
+    address_write: WriteSignal<u16>,
 ) -> impl IntoView {
-    let (address_read, address_write) = create_signal(0);
     let addr_start = move || address_read() as usize + width;
     let addr_end = move || {
         emu_read
@@ -215,11 +232,13 @@ pub fn MemEditor<T: Cpu + 'static>(
     emu_read: ReadSignal<Emulator<T>>,
     emu_write: WriteSignal<Emulator<T>>,
 ) -> impl IntoView {
+
+    let (address_read, address_write) = create_signal(0);
     view! {
         <table
             style:width="100%" class=style::table>
-            <MemThead width />
-            <MemTbody width rows emu_read emu_write />
+            <MemThead width address_read/>
+            <MemTbody width rows emu_read emu_write address_read address_write />
         </table>
     }
 }

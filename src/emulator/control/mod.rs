@@ -1,19 +1,16 @@
-use emu_lib::cpu::instruction::BaseInstruction;
-use emu_lib::cpu::z80::Z80;
+use super::style;
+use emu_lib::cpu::instruction::ExecutableInstruction;
 use emu_lib::cpu::Cpu;
-use emu_lib::emulator::{Emulator, StopReason};
+use emu_lib::emulator::Emulator;
 use leptos::leptos_dom::helpers::IntervalHandle;
 use leptos::wasm_bindgen::closure::Closure;
 use leptos::wasm_bindgen::{JsCast, JsValue};
 use leptos::*;
 use std::time::Duration;
-use stylance::import_style;
-use tokio::time::sleep;
 use web_sys::js_sys;
 
-import_style!(style, "../table.module.scss");
 #[component]
-pub fn Control<T:Cpu+Default+'static>(
+pub fn Control<T: Cpu + Default + 'static>(
     emu_read: ReadSignal<Emulator<T>>,
     emu_write: WriteSignal<Emulator<T>>,
 ) -> impl IntoView {
@@ -26,8 +23,11 @@ pub fn Control<T:Cpu+Default+'static>(
     let (running, set_running) = create_signal::<Option<Result<IntervalHandle, JsValue>>>(None);
     let step = move || {
         emu_write.update(|emu| {
-            if let Err(e) = emu.step() {
-                log::error!("Error stepping: {}", e);
+            if let Err(e) = emu.run_ticks(
+                100.0,
+                &None as &Option<fn(&mut _, &dyn ExecutableInstruction<_>)>,
+            ) {
+                log::error!("Error stepping: {:?}", e);
                 if let Some(Ok(int)) = running.get() {
                     int.clear();
                     set_running.set(None);

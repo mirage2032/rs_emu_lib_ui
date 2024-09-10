@@ -1,13 +1,12 @@
+use super::style;
 use emu_lib::cpu::Cpu;
-use emu_lib::cpu::z80::Z80;
 use emu_lib::emulator::Emulator;
 use emu_lib::memory::MemoryDevice;
 use leptos::logging::{log, warn};
 use leptos::wasm_bindgen::JsCast;
 use leptos::*;
-use stylance::import_style;
-
-import_style!(style, "../table.module.scss");
+use web_sys::HtmlInputElement;
+use std::borrow::BorrowMut;
 
 #[component]
 fn MemThead(width: usize) -> impl IntoView {
@@ -30,39 +29,36 @@ fn MemThead(width: usize) -> impl IntoView {
 }
 
 #[component]
-fn MemCell<T:Cpu+Default+'static>(
-    //index is a derived usize
+fn MemCell<T: Cpu + Default + 'static>(
     index: Signal<usize>,
     emu_read: ReadSignal<Emulator<T>>,
     emu_write: WriteSignal<Emulator<T>>,
 ) -> impl IntoView {
-    let i_getval = move |index: usize| -> Result<u8, &str> {
-        let address = u16::try_from(index).map_err(|_| "Address outside memory range")?;
-        emu_read.with(|emu| emu.memory.read_8(address))
+    let i_getval = move || -> Result<u8, &str> {
+        emu_read.with(|emu| emu.memory.read_8(index() as u16))
     };
 
-    let s_getval = move |index: usize| -> String {
-        match i_getval(index) {
+    let s_getval = move || -> String {
+        match i_getval() {
             Ok(val) => format!("{:02X}", val),
             Err(_) => "??".to_string(),
         }
     };
 
-    let i_setval = move |index: usize, value: &u8| -> Result<(), &str> {
-        let address = u16::try_from(index).map_err(|_| "Address outside memory range")?;
+    let i_setval = move |value: &u8| -> Result<(), &str> {
         let mut result = Err("Mem not written");
         emu_write.update(|emu: &mut Emulator<T>| {
-            result = emu.memory.write_8(address, *value);
+            result = emu.memory.write_8(index() as u16 , *value);
         });
         result
     };
 
-    let s_setval = move |index: usize, value: &str| -> Result<u8, &str> {
+    let s_setval = move |value: &str| -> Result<(), &str> {
         let hexval = u8::from_str_radix(value, 16);
         match hexval {
             Ok(val) => {
-                i_setval(index, &val)?;
-                Ok(val)
+                i_setval(&val)?;
+                Ok(())
             }
             Err(_) => Err("Invalid hex value"),
         }
@@ -71,35 +67,25 @@ fn MemCell<T:Cpu+Default+'static>(
     view! {
         <input
             maxlength=2
-            value=move || s_getval(index())
-            style:width="2.5ch"
-            on:change=move |event| {
-                event
-                    .target()
-                    .map(|target| {
-                        let element = target.dyn_into::<web_sys::HtmlInputElement>().unwrap();
-                        let elem_val = &element.value();
-                        let idx = index();
-                        let result = s_setval(idx, elem_val);
-                        match result {
-                            Ok(val) => {
-                                element.set_value(&format!("{:02X}", val));
-                            }
-                            Err(err) => {
-                                warn!(
-                                    "Error saving value: {} at pos: {} with error: {}", element.value(),idx,err
-                                );
-                                let real_val = s_getval(idx);
-                                element.set_value(&real_val);
-                            }
-                        }
-                    });
+            prop:value=move || s_getval()
+            style:width="100%"
+            on:change=move |ev| {
+                let elem_val = event_target_value(&ev);
+                if let Err(err) = s_setval(&elem_val){
+                        warn!(
+                            "Error saving value: {} at pos: {} with error: {}", elem_val,index(),err
+                        );
+                        let real_val = s_getval();
+                        event_target::<HtmlInputElement>(&ev)
+                            .borrow_mut()
+                            .set_value(&real_val);
+                    }
             }
             on:click=move |event| {
                 event
                     .target()
                     .map(|target| {
-                        let element = target.dyn_into::<web_sys::HtmlInputElement>().unwrap();
+                        let element = target.dyn_into::<HtmlInputElement>().unwrap();
                         element.select();
                     });
             }
@@ -108,12 +94,12 @@ fn MemCell<T:Cpu+Default+'static>(
 }
 
 #[component]
-fn MemThs<T:Cpu+Default+'static>(
+fn MemThs<T: Cpu + Default + 'static>(
     width: usize,
     emu_read: ReadSignal<Emulator<T>>,
     emu_write: WriteSignal<Emulator<T>>,
     row_start: Signal<usize>,
-) -> impl IntoView {
+) -> impl IntoView {;
     view! {
         {(0..width)
             .map(move |i| {
@@ -128,7 +114,7 @@ fn MemThs<T:Cpu+Default+'static>(
 }
 
 #[component]
-fn MemTrCounter<T:Cpu+Default+'static>(
+fn MemTrCounter<T: Cpu + Default + 'static>(
     width: usize,
     emu_read: ReadSignal<Emulator<T>>,
     emu_write: WriteSignal<Emulator<T>>,
@@ -143,7 +129,7 @@ fn MemTrCounter<T:Cpu+Default+'static>(
                     class=style::tablecount
                     style:width="4.2ch"
                     maxlength=4
-                    value=move || format!("{:04X}", address_read())
+                    prop:value=move || format!("{:04X}", address_read())
                     on:change=move |event| {
                         event
                             .target()
@@ -178,7 +164,7 @@ fn MemTrCounter<T:Cpu+Default+'static>(
 }
 
 #[component]
-fn MemTr<T:Cpu+Default+'static>(
+fn MemTr<T: Cpu + Default + 'static>(
     width: usize,
     emu_read: ReadSignal<Emulator<T>>,
     emu_write: WriteSignal<Emulator<T>>,
@@ -195,7 +181,7 @@ fn MemTr<T:Cpu+Default+'static>(
 }
 
 #[component]
-pub fn MemTbody<T:Cpu+Default+'static>(
+pub fn MemTbody<T: Cpu + Default + 'static>(
     width: usize,
     rows: usize,
     emu_read: ReadSignal<Emulator<T>>,
@@ -223,7 +209,7 @@ pub fn MemTbody<T:Cpu+Default+'static>(
 }
 
 #[component]
-pub fn MemEditor<T:Cpu+Default+'static>(
+pub fn MemEditor<T: Cpu + Default + 'static>(
     width: usize,
     rows: usize,
     emu_read: ReadSignal<Emulator<T>>,

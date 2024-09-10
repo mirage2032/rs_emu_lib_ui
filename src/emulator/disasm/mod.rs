@@ -1,18 +1,15 @@
-use emu_lib::cpu::z80::Z80;
+use super::style;
 use emu_lib::cpu::Cpu;
 use emu_lib::emulator::Emulator;
 use emu_lib::memory::MemoryDevice;
 use leptos::logging::log;
 use leptos::wasm_bindgen::JsCast;
 use leptos::*;
-use stylance::{classes, import_style};
-
-import_style!(style, "../table.module.scss");
+use stylance::classes;
 
 #[component]
-pub fn FollowPCSwitch<T:Cpu+Default+'static>(
+pub fn FollowPCSwitch<T: Cpu + Default + 'static>(
     emu_read: ReadSignal<Emulator<T>>,
-    emu_write: WriteSignal<Emulator<T>>,
     start_pos_read: ReadSignal<Option<u16>>,
     start_pos_write: WriteSignal<Option<u16>>,
 ) -> impl IntoView {
@@ -32,7 +29,7 @@ pub fn FollowPCSwitch<T:Cpu+Default+'static>(
                             start_pos_write
                                 .update(|v| {
                                     if v.is_none() {
-                                        *v = Some(emu_read.with(|emu| emu.cpu.registers().pc))
+                                        *v = Some(emu_read.with(|emu| *emu.cpu.registers().pc))
                                     } else {
                                         *v = None
                                     }
@@ -69,7 +66,7 @@ pub fn FollowPCSwitch<T:Cpu+Default+'static>(
                             }
                             style:width="5ch"
                             maxlength=4
-                            value=move || format!("{:04X}", start_pos_read().unwrap())
+                            prop:value=move || format!("{:04X}", start_pos_read().unwrap())
                         />
                     </Show>
                 </div>
@@ -96,13 +93,13 @@ pub fn DisasmThead() -> impl IntoView {
 }
 
 #[component]
-pub fn DisasmTr<T:Cpu+Default+'static>(
+pub fn DisasmTr<T: Cpu + Default + 'static>(
     address: u16,
-    instruction: Result<Box<dyn emu_lib::cpu::instruction::BaseInstruction>, String>,
+    instruction: Result<Box<dyn emu_lib::cpu::instruction::ExecutableInstruction<T>>, String>,
     emu_read: ReadSignal<Emulator<T>>,
     emu_write: WriteSignal<Emulator<T>>,
 ) -> impl IntoView {
-    let elem_class = move || match emu_read.with(|emu| emu.cpu.registers().pc == address) {
+    let elem_class = move || match emu_read.with(|emu| *emu.cpu.registers().pc == address) {
         true => classes! {
             style::colorfocus,
             style::tableleft
@@ -122,11 +119,11 @@ pub fn DisasmTr<T:Cpu+Default+'static>(
                         .map(|b| format!("{:02X}", b))
                         .collect::<String>();
                     view! {
-                        <td class=elem_class>
-                            <span>{ins_hexstr}</span>
+                        <td class=style::tablecell style:text-align="left" >
+                            <input style:width="8ch" prop:value=ins_hexstr/>
                         </td>
                         <td class=style::tablecell>
-                            <span>{ins.to_string()}</span>
+                            <input prop:value=ins.to_string() />
                         </td>
                     }
                 }
@@ -151,7 +148,7 @@ pub fn DisasmTr<T:Cpu+Default+'static>(
 }
 
 #[component]
-pub fn DisasmTbody<T:Cpu+Default+'static>(
+pub fn DisasmTbody<T: Cpu + Default + 'static>(
     rows: usize,
     emu_read: ReadSignal<Emulator<T>>,
     emu_write: WriteSignal<Emulator<T>>,
@@ -162,7 +159,7 @@ pub fn DisasmTbody<T:Cpu+Default+'static>(
             {
                 let rows = move || {
                     let mut pc = start_pos_read
-                        .with(|val| val.unwrap_or(emu_read.with(|emu| emu.cpu.registers().pc)))
+                        .with(|val| val.unwrap_or(emu_read.with(|emu| *emu.cpu.registers().pc)))
                         as usize;
                     (0..rows)
                         .map(|_| {
@@ -173,8 +170,8 @@ pub fn DisasmTbody<T:Cpu+Default+'static>(
                                     })
                             };
                             let size = match &instruction {
-                                Ok(ins) => ins.common().get_length() as usize,
-                                Err(e) => 1,
+                                Ok(ins) => ins.common().length as usize,
+                                Err(_) => 1,
                             };
                             pc += size;
                             view! {
@@ -195,16 +192,16 @@ pub fn DisasmTbody<T:Cpu+Default+'static>(
 }
 
 #[component]
-pub fn Disassembler<T:Cpu+Default+'static>(
+pub fn Disassembler<T: Cpu + Default + 'static>(
     rows: usize,
     emu_read: ReadSignal<Emulator<T>>,
     emu_write: WriteSignal<Emulator<T>>,
 ) -> impl IntoView {
     let (start_pos_read, start_pos_write) = create_signal(None);
     view! {
-        <table class=style::table>
+        <table class=style::table style:width="100%">
             <thead>
-                <FollowPCSwitch emu_read emu_write start_pos_read start_pos_write />
+                <FollowPCSwitch emu_read start_pos_read start_pos_write />
                 <DisasmThead />
             </thead>
             <DisasmTbody rows emu_read emu_write start_pos_read />

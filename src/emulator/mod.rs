@@ -4,6 +4,7 @@ use leptos::html::Div;
 use leptos_use::{use_draggable_with_options, UseDraggableOptions, UseDraggableReturn};
 use leptos_use::core::Position;
 use stylance::import_style;
+use emu_lib::cpu::Cpu;
 
 mod control;
 mod disasm;
@@ -11,9 +12,9 @@ pub mod memory;
 mod registers;
 
 import_style!(style, "table.module.scss");
-#[component]
-pub fn Emulator() -> impl IntoView {
-    let mut emulator: emu_lib::emulator::Emulator<Z80> = emu_lib::emulator::Emulator::new();
+// #[component]
+pub fn emulator<T:Cpu + 'static>() -> impl IntoView {
+    let mut emulator: emu_lib::emulator::Emulator<T> = emu_lib::emulator::Emulator::new();
     let rom_data = include_bytes!("../../deps/rs_emu_lib/emu_cli/roms/color.bin");
     // let test = "AAAAAAAABBBBBBBBCCCCCCCCDDDDDDDDEEEEEEEEFFFFFFFFGGGGGGGGHHHHHHHHIIIIIIII".to_string();//.repeat(5);
     // emulator.memory.load(test.as_bytes()).unwrap();

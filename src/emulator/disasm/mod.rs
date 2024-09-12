@@ -19,7 +19,7 @@ pub fn FollowPCSwitch<T: Cpu + 'static>(
     };
     view! {
         <tr>
-            <td colspan=3>
+            <td colspan=4>
                 <div style:display="flex">
                     <button
                         class=elem_class
@@ -80,6 +80,9 @@ pub fn DisasmThead() -> impl IntoView {
     view! {
         <tr>
             <th class=style::tabletop>
+                <span>"Bk"</span>
+            </th>
+            <th class=style::tabletop>
                 <span>"Address"</span>
             </th>
             <th class=style::tabletop>
@@ -99,7 +102,26 @@ pub fn DisasmTr<T: Cpu + 'static>(
     emu_read: ReadSignal<Emulator<T>>,
     emu_write: WriteSignal<Emulator<T>>,
 ) -> impl IntoView {
-    let elem_class = move || match emu_read.with(|emu| *emu.cpu.registers().pc == address) {
+    let class_is_bk = move || {
+        let is_bk = emu_read.with(|emu| emu.breakpoints.contains(&address));
+        match is_bk {
+            true => classes! {
+                style::colorbreakpoint,
+                style::tableleft
+            },
+            false => style::tableleft.to_string(),
+        }
+    };
+    let switch_bk = move |_| {
+        emu_write.update(|emu| {
+            if emu.breakpoints.contains(&address) {
+                emu.breakpoints.retain(|&x| x != address);
+            } else {
+                emu.breakpoints.push(address);
+            }
+        });
+    };
+    let class_is_pc = move || match emu_read.with(|emu| *emu.cpu.registers().pc == address) {
         true => classes! {
             style::colorfocus,
             style::tableleft
@@ -108,7 +130,11 @@ pub fn DisasmTr<T: Cpu + 'static>(
     };
     view! {
         <tr>
-            <td class=elem_class>
+            <td class=class_is_bk
+            on:click=switch_bk
+            >
+            </td>
+            <td class=class_is_pc>
                 <span>{format!("{:04X}", address)}</span>
             </td>
             {match instruction {

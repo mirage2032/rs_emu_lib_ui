@@ -34,7 +34,7 @@ pub fn Control<T: Cpu + 'static>(
     let step = move || {
         emu_write.update(|emu| {
             if let Err(e) = emu.run_ticks(
-                10.0,
+                300000.0,
                 &None as &Option<fn(&mut _, &dyn ExecutableInstruction<_>)>,
             ) {
                 log::error!("Error stepping: {:?}", e);

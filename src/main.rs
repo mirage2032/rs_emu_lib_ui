@@ -1,7 +1,7 @@
-use leptos::*;
 use emu_lib::cpu::z80::Z80;
+use leptos::*;
 
-mod emulator;
+pub mod emulator;
 
 fn main() {
     console_error_panic_hook::set_once();

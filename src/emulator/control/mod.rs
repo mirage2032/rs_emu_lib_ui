@@ -14,10 +14,12 @@ pub fn Control<T: Cpu + 'static>(
     emu_read: ReadSignal<Emulator<T>>,
     emu_write: WriteSignal<Emulator<T>>,
 ) -> impl IntoView {
-    let halted_class = move || emu_read.with(|emu| match emu.cpu.halted(){
-        true => style::tablebuttoninvert,
-        false => style::tablebutton,
-    });
+    let halted_class = move || {
+        emu_read.with(|emu| match emu.cpu.halted() {
+            true => style::tablebuttoninvert,
+            false => style::tablebutton,
+        })
+    };
     let switch_halt = move || {
         emu_write.update(|emu| {
             emu.cpu.set_halted(!emu.cpu.halted());

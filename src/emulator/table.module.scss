@@ -25,12 +25,11 @@ $border-size: 2px;
 }
 
 .tablecell {
-  @include tablebase;
   border: $border-size solid $cl-border;
   text-align: center;
   background-color: $cl-bg-editable;
   color: $cl-txt;
-
+  @include tablebase;
   input {
     //height: 100%;
     //padding: 0.1rem;
@@ -41,11 +40,11 @@ $border-size: 2px;
 }
 
 .tableleft {
-  @include tablebase;
   background-color: $cl-bg-static;
   border: $border-size solid $cl-border;
   text-align: left;
   color: $cl-txt;
+  @include tablebase;
   input {
     text-align: inherit;
     color: inherit;
@@ -53,32 +52,32 @@ $border-size: 2px;
 }
 
 .tabletop {
-  @include tablebase;
   background-color: $cl-bg-static;
   border: $border-size solid $cl-border;
   text-align: center;
   color: $cl-txt;
+  @include tablebase;
 }
 
 .tablebutton {
-  @include tablebase;
   user-select: none;
   background-color: $cl-bg-button;
   border: $border-size solid $cl-border;
   text-align: center;
   color: $cl-txt;
+  @include tablebase;
   &:active {
     background-color: $cl-bg-button-active;
   }
 }
 
 .tablebuttoninvert {
-  @include tablebase;
   user-select: none;
   background-color: $cl-bg-button-active;
   border: $border-size solid $cl-border;
   text-align: center;
   color: $cl-txt;
+  @include tablebase;
   &:active {
     background-color: $cl-bg-button;
   }
@@ -96,6 +95,6 @@ $border-size: 2px;
 }
 
 .tablecount {
-  @include tablebase;
   background-color: $cl-bg-editable;
+  @include tablebase;
 }

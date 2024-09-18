@@ -102,9 +102,7 @@ pub fn DisasmTr<T: Cpu + 'static>(
     emu_read: ReadSignal<Emulator<T>>,
     emu_write: WriteSignal<Emulator<T>>,
 ) -> impl IntoView {
-    let class_is_bk = move || {
-        emu_read.with(|emu| emu.breakpoints.contains(&address))
-    };
+    let class_is_bk = move || emu_read.with(|emu| emu.breakpoints.contains(&address));
     let switch_bk = move |_| {
         emu_write.update(|emu| {
             if emu.breakpoints.contains(&address) {
@@ -123,14 +121,12 @@ pub fn DisasmTr<T: Cpu + 'static>(
     };
     view! {
         <tr>
-            <td class=class_is_pc
-            on:click=switch_bk
-            >
-            <Show when=class_is_bk>
-                <div style:display="flex" style:justify-content="center">
-                <div class=style::breakpoint></div>
-                </div>
-            </Show>
+            <td class=class_is_pc on:click=switch_bk>
+                <Show when=class_is_bk>
+                    <div style:display="flex" style:justify-content="center">
+                        <div class=style::breakpoint></div>
+                    </div>
+                </Show>
             </td>
             <td class=class_is_pc>
                 <span>{format!("{:04X}", address)}</span>
@@ -143,8 +139,8 @@ pub fn DisasmTr<T: Cpu + 'static>(
                         .map(|b| format!("{:02X}", b))
                         .collect::<String>();
                     view! {
-                        <td class=style::tablecell style:text-align="left" >
-                            <input style:width="8ch" prop:value=ins_hexstr/>
+                        <td class=style::tablecell style:text-align="left">
+                            <input style:width="8ch" prop:value=ins_hexstr />
                         </td>
                         <td class=style::tablecell>
                             <input prop:value=ins.to_string() />

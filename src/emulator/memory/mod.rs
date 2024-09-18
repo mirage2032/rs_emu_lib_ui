@@ -5,19 +5,19 @@ use emu_lib::memory::MemoryDevice;
 use leptos::logging::{log, warn};
 use leptos::wasm_bindgen::JsCast;
 use leptos::*;
-use web_sys::HtmlInputElement;
 use std::borrow::BorrowMut;
+use web_sys::HtmlInputElement;
 
 #[component]
-fn MemThead(width: usize, address_read: ReadSignal<u16>,) -> impl IntoView {
+fn MemThead(width: usize, address_read: ReadSignal<u16>) -> impl IntoView {
     let suffix = move |offset: u16| {
         let address: u16 = address_read();
-        if offset > (0x10-(address & 0x00FF)) {
+        if offset > (0x10 - (address & 0x00FF)) {
             let offset = (address & 0x00FF) + offset;
-            format!("{:02X}",offset)
+            format!("{:02X}", offset)
         } else {
             let offset = (address & 0x00FF) + offset;
-            format!("{:01X}",offset)
+            format!("{:01X}", offset)
         }
     };
     view! {
@@ -64,7 +64,7 @@ fn MemCell<T: Cpu + 'static>(
         }
         let mut result = Err("Unknown error");
         emu_write.update(|emu: &mut Emulator<T>| {
-            result = emu.memory.write_8(index() as u16 , *value);
+            result = emu.memory.write_8(index() as u16, *value);
         });
         result
     };
@@ -87,15 +87,11 @@ fn MemCell<T: Cpu + 'static>(
             style:width="100%"
             on:change=move |ev| {
                 let elem_val = event_target_value(&ev);
-                if let Err(err) = s_setval(&elem_val){
-                        warn!(
-                            "Error saving value: {} at pos: {} with error: {}", elem_val,index(),err
-                        );
-                        let real_val = s_getval();
-                        event_target::<HtmlInputElement>(&ev)
-                            .borrow_mut()
-                            .set_value(&real_val);
-                    }
+                if let Err(err) = s_setval(&elem_val) {
+                    warn!("Error saving value: {} at pos: {} with error: {}", elem_val,index(),err);
+                    let real_val = s_getval();
+                    event_target::<HtmlInputElement>(&ev).borrow_mut().set_value(&real_val);
+                }
             }
             on:click=move |event| {
                 event
@@ -115,7 +111,7 @@ fn MemThs<T: Cpu + 'static>(
     emu_read: ReadSignal<Emulator<T>>,
     emu_write: WriteSignal<Emulator<T>>,
     row_start: Signal<usize>,
-) -> impl IntoView {;
+) -> impl IntoView {
     view! {
         {(0..width)
             .map(move |i| {
@@ -232,12 +228,10 @@ pub fn MemEditor<T: Cpu + 'static>(
     emu_read: ReadSignal<Emulator<T>>,
     emu_write: WriteSignal<Emulator<T>>,
 ) -> impl IntoView {
-
     let (address_read, address_write) = create_signal(0);
     view! {
-        <table
-            style:width="100%" class=style::table>
-            <MemThead width address_read/>
+        <table style:width="100%" class=style::table>
+            <MemThead width address_read />
             <MemTbody width rows emu_read emu_write address_read address_write />
         </table>
     }

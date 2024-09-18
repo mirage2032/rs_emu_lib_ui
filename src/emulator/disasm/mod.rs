@@ -1,4 +1,4 @@
-use super::STYLE;
+use super::style;
 use emu_lib::cpu::Cpu;
 use emu_lib::emulator::Emulator;
 use emu_lib::memory::MemoryDevice;
@@ -13,8 +13,8 @@ pub fn FollowPCSwitch<T: Cpu + 'static>(
     start_pos_write: WriteSignal<Option<u16>>,
 ) -> impl IntoView {
     let elem_class = move || match start_pos_read.get() {
-        Some(_) => STYLE::tablebutton,
-        None => STYLE::tablebuttoninvert,
+        Some(_) => style::tablebutton,
+        None => style::tablebuttoninvert,
     };
     view! {
         <tr>
@@ -39,7 +39,7 @@ pub fn FollowPCSwitch<T: Cpu + 'static>(
                     </button>
                     <Show when=move || start_pos_read.get().is_some()>
                         <input
-                            class=STYLE::tablecount
+                            class=style::tablecount
                             style:outline="none"
                             style:border="none"
                             on:change=move |event| {
@@ -78,16 +78,16 @@ pub fn FollowPCSwitch<T: Cpu + 'static>(
 pub fn DisasmThead() -> impl IntoView {
     view! {
         <tr>
-            <th class=STYLE::tabletop>
+            <th class=style::tabletop>
                 <span>"Bk"</span>
             </th>
-            <th class=STYLE::tabletop>
+            <th class=style::tabletop>
                 <span>"Address"</span>
             </th>
-            <th class=STYLE::tabletop>
+            <th class=style::tabletop>
                 <span>"Hex"</span>
             </th>
-            <th class=STYLE::tabletop>
+            <th class=style::tabletop>
                 <span>"Asm"</span>
             </th>
         </tr>
@@ -113,17 +113,17 @@ pub fn DisasmTr<T: Cpu + 'static>(
     };
     let class_is_pc = move || match emu_read.with(|emu| *emu.cpu.registers().pc == address) {
         true => classes! {
-            STYLE::colorfocus,
-            STYLE::tableleft
+            style::colorfocus,
+            style::tableleft
         },
-        false => STYLE::tableleft.to_string(),
+        false => style::tableleft.to_string(),
     };
     view! {
         <tr>
             <td class=class_is_pc on:click=switch_bk>
                 <Show when=class_is_bk>
                     <div style:display="flex" style:justify-content="center">
-                        <div class=STYLE::breakpoint></div>
+                        <div class=style::breakpoint></div>
                     </div>
                 </Show>
             </td>
@@ -138,17 +138,17 @@ pub fn DisasmTr<T: Cpu + 'static>(
                         .map(|b| format!("{:02X}", b))
                         .collect::<String>();
                     view! {
-                        <td class=STYLE::tablecell style:text-align="left">
+                        <td class=style::tablecell style:text-align="left">
                             <input style:width="10ch" prop:value=ins_hexstr />
                         </td>
-                        <td class=STYLE::tablecell>
+                        <td class=style::tablecell>
                             <input prop:value=ins.to_string() />
                         </td>
                     }
                 }
                 Err(_) => {
                     view! {
-                        <td class=STYLE::tableleft>
+                        <td class=style::tableleft>
                             <span>
                                 {emu_read
                                     .with(|emu| { emu.memory.read_8(address) })
@@ -156,7 +156,7 @@ pub fn DisasmTr<T: Cpu + 'static>(
                                     .unwrap_or_else(|_| "??".to_string())}
                             </span>
                         </td>
-                        <td class=STYLE::tablecell>
+                        <td class=style::tablecell>
                             <span>"UNKNOWN"</span>
                         </td>
                     }
@@ -218,7 +218,7 @@ pub fn Disassembler<T: Cpu + 'static>(
 ) -> impl IntoView {
     let (start_pos_read, start_pos_write) = create_signal(None);
     view! {
-        <table class=STYLE::table style:width="100%">
+        <table class=style::table style:width="100%">
             <thead>
                 <FollowPCSwitch emu_read start_pos_read start_pos_write />
                 <DisasmThead />

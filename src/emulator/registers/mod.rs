@@ -1,4 +1,4 @@
-use super::STYLE;
+use super::style;
 use emu_lib::cpu::i8080::I8080;
 use emu_lib::cpu::z80::Z80;
 use emu_lib::cpu::Cpu;
@@ -22,17 +22,17 @@ fn Register(
     set: impl Fn(&str) -> Result<(), std::num::ParseIntError> + 'static,
 ) -> impl IntoView {
     view! {
-        <table class=STYLE::table>
+        <table class=style::table>
             <thead>
                 <tr>
-                    <th class=STYLE::tabletop>
+                    <th class=style::tabletop>
                         <span>{name}</span>
                     </th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <th class=STYLE::tablecell>
+                    <th class=style::tablecell>
                         <input
                             style:width="100%"
                             maxlength=maxlength

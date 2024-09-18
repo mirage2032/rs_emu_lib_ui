@@ -1,4 +1,4 @@
-use super::STYLE;
+use super::style;
 use emu_lib::cpu::instruction::ExecutableInstruction;
 use emu_lib::cpu::Cpu;
 use emu_lib::emulator::Emulator;
@@ -16,8 +16,8 @@ pub fn Control<T: Cpu + 'static>(
 ) -> impl IntoView {
     let halted_class = move || {
         emu_read.with(|emu| match emu.cpu.halted() {
-            true => STYLE::tablebuttoninvert,
-            false => STYLE::tablebutton,
+            true => style::tablebuttoninvert,
+            false => style::tablebutton,
         })
     };
     let switch_halt = move || {
@@ -28,9 +28,9 @@ pub fn Control<T: Cpu + 'static>(
     let (running, set_running) = create_signal::<Option<Result<IntervalHandle, JsValue>>>(None);
     let run_class = move || {
         if let Some(Ok(_)) = running.get() {
-            STYLE::tablebuttoninvert
+            style::tablebuttoninvert
         } else {
-            STYLE::tablebutton
+            style::tablebutton
         }
     };
     let step = move || {
@@ -61,10 +61,10 @@ pub fn Control<T: Cpu + 'static>(
     };
 
     view! {
-        <table style:width="100%" class=STYLE::table>
+        <table style:width="100%" class=style::table>
             <tr>
                 <th
-                    class=STYLE::tablebutton
+                    class=style::tablebutton
                     style:padding="0.3rem"
                     on:click=move |_| {
                         emu_write
@@ -98,7 +98,7 @@ pub fn Control<T: Cpu + 'static>(
                 >
                     Halted
                 </th>
-                <th class=STYLE::tablebutton>
+                <th class=style::tablebutton>
                     <input
                         on:change=move |event| {
                             event

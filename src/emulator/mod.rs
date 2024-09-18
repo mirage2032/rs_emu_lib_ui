@@ -14,7 +14,7 @@ mod disasm;
 mod display;
 pub mod memory;
 mod registers;
-import_style!(#[allow(dead_code)] STYLE, "table.module.scss");
+import_style!(#[allow(dead_code)] style, "table.module.scss");
 #[component]
 pub fn emu_z80() -> impl IntoView {
     emulator::<Z80>()

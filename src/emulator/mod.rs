@@ -40,7 +40,7 @@ pub fn emulator<T: Cpu + 'static>() -> impl IntoView {
 
     let mut emulator: emu_lib::emulator::Emulator<T> =
         emu_lib::emulator::Emulator::new_w_mem(memory);
-    let rom_data = include_bytes!("../../deps/rs_emu_lib/emu_cli/roms/color2.bin");
+    let rom_data = include_bytes!("../../color2.bin");
     // let test = "AAAAAAAABBBBBBBBCCCCCCCCDDDDDDDDEEEEEEEEFFFFFFFFGGGGGGGGHHHHHHHHIIIIIIII".to_string();//.repeat(5);
     // emulator.memory.load(test.as_bytes()).unwrap();
     emulator.memory.load(rom_data).unwrap();

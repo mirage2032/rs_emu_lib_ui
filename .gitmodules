@@ -1,3 +1,0 @@
-[submodule "deps/rs_emu_lib"]
-	path = deps/rs_emu_lib
-	url = https://github.com/mirage2032/rs_emu_lib.git

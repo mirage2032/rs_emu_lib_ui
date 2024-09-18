@@ -2,7 +2,7 @@ use crate::emulator::registers::Register;
 use emu_lib::cpu::z80::Z80;
 use emu_lib::emulator::Emulator;
 use leptos::{
-    component, event_target_value, view, IntoView, ReadSignal, Signal, SignalUpdate, SignalWith,
+    component, view, IntoView, ReadSignal, Signal, SignalUpdate, SignalWith,
     WriteSignal,
 };
 

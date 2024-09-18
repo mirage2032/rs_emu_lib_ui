@@ -3,8 +3,7 @@ use emu_lib::cpu::Cpu;
 use emu_lib::emulator::Emulator;
 use emu_lib::memory::MemoryDevice;
 use leptos::logging::{log, warn};
-use leptos::wasm_bindgen::JsCast;
-use leptos::*;
+use web_sys::wasm_bindgen::JsCast;use leptos::*;
 use std::borrow::BorrowMut;
 use web_sys::HtmlInputElement;
 
@@ -139,7 +138,7 @@ fn MemTrCounter<T: Cpu + 'static>(
                 <span>"0x"</span>
                 <input
                     class=style::tablecount
-                    style:width="4.5ch"
+                    style:width="100%"
                     maxlength=4
                     prop:value=move || format!("{:04X}", address_read())
                     on:change=move |event| {

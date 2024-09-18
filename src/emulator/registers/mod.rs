@@ -3,9 +3,9 @@ use emu_lib::cpu::i8080::I8080;
 use emu_lib::cpu::z80::Z80;
 use emu_lib::cpu::Cpu;
 use emu_lib::emulator::Emulator;
-use leptos::logging::{error, warn};
+use leptos::logging::warn;
 use leptos::{
-    component, event_target, event_target_value, view, IntoView, ReadSignal, Signal, SignalGet,
+    component, event_target, event_target_value, view, IntoView, ReadSignal, Signal,
     SignalWithUntracked, WriteSignal,
 };
 use std::borrow::BorrowMut;

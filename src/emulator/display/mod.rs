@@ -1,8 +1,7 @@
 use emu_lib::memory::MemoryDevice;
 use leptos::html::Canvas;
 use leptos::logging::log;
-use leptos::wasm_bindgen::JsCast;
-use leptos::{create_effect, create_node_ref, view, HtmlElement, Signal, SignalWith};
+use web_sys::wasm_bindgen::JsCast;use leptos::{create_effect, create_node_ref, view, HtmlElement, Signal, SignalWith};
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};

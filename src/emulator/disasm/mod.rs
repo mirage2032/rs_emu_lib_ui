@@ -3,8 +3,7 @@ use emu_lib::cpu::Cpu;
 use emu_lib::emulator::Emulator;
 use emu_lib::memory::MemoryDevice;
 use leptos::logging::log;
-use leptos::wasm_bindgen::JsCast;
-use leptos::*;
+use web_sys::wasm_bindgen::JsCast;use leptos::*;
 use stylance::classes;
 
 #[component]
@@ -140,7 +139,7 @@ pub fn DisasmTr<T: Cpu + 'static>(
                         .collect::<String>();
                     view! {
                         <td class=style::tablecell style:text-align="left">
-                            <input style:width="8ch" prop:value=ins_hexstr />
+                            <input style:width="10ch" prop:value=ins_hexstr />
                         </td>
                         <td class=style::tablecell>
                             <input prop:value=ins.to_string() />

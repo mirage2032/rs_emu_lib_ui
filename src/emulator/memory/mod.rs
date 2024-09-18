@@ -1,4 +1,4 @@
-use super::style;
+use super::STYLE;
 use emu_lib::cpu::Cpu;
 use emu_lib::emulator::Emulator;
 use emu_lib::memory::MemoryDevice;
@@ -22,11 +22,11 @@ fn MemThead(width: usize, address_read: ReadSignal<u16>) -> impl IntoView {
     view! {
         <thead>
             <tr>
-                <th class=style::tableleft></th>
+                <th class=STYLE::tableleft></th>
                 {(0..width)
                     .map(move |x| {
                         view! {
-                            <th class=style::tabletop style:min-width="2.5ch">
+                            <th class=STYLE::tabletop style:min-width="2.5ch">
                                 <span>{move || suffix(x as u16)}</span>
                             </th>
                         }
@@ -115,7 +115,7 @@ fn MemThs<T: Cpu + 'static>(
         {(0..width)
             .map(move |i| {
                 view! {
-                    <th class=style::tablecell>
+                    <th class=STYLE::tablecell>
                         <MemCell index=Signal::derive(move || row_start() + i) emu_read emu_write />
                     </th>
                 }
@@ -134,10 +134,10 @@ fn MemTrCounter<T: Cpu + 'static>(
 ) -> impl IntoView {
     view! {
         <tr>
-            <th class=style::tableleft style:display="flex" style:border="none">
+            <th class=STYLE::tableleft style:display="flex" style:border="none">
                 <span>"0x"</span>
                 <input
-                    class=style::tablecount
+                    class=STYLE::tablecount
                     style:width="100%"
                     maxlength=4
                     prop:value=move || format!("{:04X}", address_read())
@@ -183,7 +183,7 @@ fn MemTr<T: Cpu + 'static>(
 ) -> impl IntoView {
     view! {
         <tr>
-            <th class=style::tableleft>
+            <th class=STYLE::tableleft>
                 <span>{format!("0x{:04X}", row_start)}</span>
             </th>
             <MemThs width emu_read emu_write row_start=Signal::derive(move || row_start) />
@@ -229,7 +229,7 @@ pub fn MemEditor<T: Cpu + 'static>(
 ) -> impl IntoView {
     let (address_read, address_write) = create_signal(0);
     view! {
-        <table style:width="100%" class=style::table>
+        <table style:width="100%" class=STYLE::table>
             <MemThead width address_read />
             <MemTbody width rows emu_read emu_write address_read address_write />
         </table>

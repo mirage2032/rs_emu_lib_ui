@@ -2,3 +2,4 @@
 /dist
 /static/css/stylance
 .idea
+Cargo.lock

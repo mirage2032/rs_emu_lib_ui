@@ -6,11 +6,11 @@ use emu_lib::memory::Memory;
 use leptos::{component, create_signal, view, IntoView, ReadSignal, Signal, SignalWith, WriteSignal};
 use stylance::import_style;
 
-mod control;
-mod disasm;
-mod display;
+pub mod control;
+pub mod disasm;
+pub mod display;
 pub mod memory;
-mod registers;
+pub mod registers;
 import_style!(#[allow(dead_code)] style, "table.module.scss");
 #[component]
 pub fn emu_z80() -> impl IntoView {

@@ -3,7 +3,9 @@ use emu_lib::cpu::z80::Z80;
 use emu_lib::cpu::Cpu;
 use emu_lib::memory::memdevices::RAM;
 use emu_lib::memory::Memory;
-use leptos::{component, create_signal, view, IntoView, ReadSignal, Signal, SignalWith, WriteSignal};
+use leptos::{
+    component, create_signal, view, IntoView, ReadSignal, Signal, SignalWith, WriteSignal,
+};
 use stylance::import_style;
 
 pub mod control;
@@ -11,7 +13,11 @@ pub mod disasm;
 pub mod display;
 pub mod memory;
 pub mod registers;
-import_style!(#[allow(dead_code)] style, "table.module.scss");
+import_style!(
+    #[allow(dead_code)]
+    style,
+    "table.module.scss"
+);
 #[component]
 pub fn emu_z80() -> impl IntoView {
     emulator::<Z80>()
@@ -22,7 +28,7 @@ pub fn emu_i8080() -> impl IntoView {
     emulator::<emu_lib::cpu::i8080::I8080>()
 }
 
-pub fn emu_with<T:Cpu+'static>(
+pub fn emu_with<T: Cpu + 'static>(
     emu_read: ReadSignal<emu_lib::emulator::Emulator<T>>,
     emu_write: WriteSignal<emu_lib::emulator::Emulator<T>>,
 ) -> impl IntoView {

@@ -35,5 +35,6 @@ hydrate = ["leptos/hydrate", "leptos_meta/hydrate"]
 ssr = ["leptos/ssr", "leptos_meta/ssr","leptos-use/ssr"]
 csr = ["leptos/csr", "leptos_meta/csr"]
 
+
 [package.metadata.stylance]
 output_dir = "./static/css"

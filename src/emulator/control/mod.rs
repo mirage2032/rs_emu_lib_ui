@@ -3,11 +3,11 @@ use emu_lib::cpu::instruction::ExecutableInstruction;
 use emu_lib::cpu::Cpu;
 use emu_lib::emulator::Emulator;
 use leptos::leptos_dom::helpers::IntervalHandle;
-use web_sys::wasm_bindgen::closure::Closure;
-use web_sys::wasm_bindgen::{JsCast, JsValue};
 use leptos::*;
 use std::time::Duration;
 use web_sys::js_sys;
+use web_sys::wasm_bindgen::closure::Closure;
+use web_sys::wasm_bindgen::{JsCast, JsValue};
 
 #[component]
 pub fn Control<T: Cpu + 'static>(

@@ -3,8 +3,9 @@ use emu_lib::cpu::Cpu;
 use emu_lib::emulator::Emulator;
 use emu_lib::memory::MemoryDevice;
 use leptos::logging::log;
-use web_sys::wasm_bindgen::JsCast;use leptos::*;
+use leptos::*;
 use stylance::classes;
+use web_sys::wasm_bindgen::JsCast;
 
 #[component]
 pub fn FollowPCSwitch<T: Cpu + 'static>(

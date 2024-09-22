@@ -1,7 +1,7 @@
-[[hooks]]
-stage = "pre_build"
-command = "stylance"
-command_arguments = ["."]
+#[[hooks]]
+#stage = "pre_build"
+#command = "make"
+#command_arguments = ["build-css"]
 
 [watch]
 ignore = ["static"]

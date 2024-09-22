@@ -8,12 +8,10 @@ $cl-txt: black;
 $cl-border: black;
 $border-size: 2px;
 
-.maincontainer{
-  font-family: 'Roboto', sans-serif;
-   & * {
-     margin: 0;
-     padding: 0;
-   }
+maincontainer{
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
   & th {
     font-weight: 400;
   }
@@ -30,12 +28,12 @@ $border-size: 2px;
   }
 }
 
-.table {
+.table-d8097de {
   border-collapse: collapse;
   border: $border-size solid $cl-border;
 }
 
-.tablecell {
+.tablecell-d8097de {
   border: $border-size solid $cl-border;
   text-align: center;
   background-color: $cl-bg-editable;
@@ -50,7 +48,7 @@ $border-size: 2px;
   }
 }
 
-.tableleft {
+.tableleft-d8097de {
   background-color: $cl-bg-static;
   border: $border-size solid $cl-border;
   text-align: left;
@@ -62,7 +60,7 @@ $border-size: 2px;
   }
 }
 
-.tabletop {
+.tabletop-d8097de {
   background-color: $cl-bg-static;
   border: $border-size solid $cl-border;
   text-align: center;
@@ -70,7 +68,7 @@ $border-size: 2px;
   @include tablebase;
 }
 
-.tablebutton {
+.tablebutton-d8097de {
   user-select: none;
   background-color: $cl-bg-button;
   border: $border-size solid $cl-border;
@@ -82,7 +80,7 @@ $border-size: 2px;
   }
 }
 
-.tablebuttoninvert {
+.tablebuttoninvert-d8097de {
   user-select: none;
   background-color: $cl-bg-button-active;
   border: $border-size solid $cl-border;
@@ -94,18 +92,18 @@ $border-size: 2px;
   }
 }
 
-.colorfocus {
+.colorfocus-d8097de {
   background-color: $cl-bg-focus;
 }
 
-.breakpoint {
+.breakpoint-d8097de {
   height: 0.7rem;
   width: 0.7rem;
   border-radius: 50%;
   background-color: $cl-bg-breakpoint;
 }
 
-.tablecount {
+.tablecount-d8097de {
   background-color: $cl-bg-editable;
   @include tablebase;
 }

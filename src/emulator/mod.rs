@@ -70,7 +70,7 @@ pub fn emulator<T: Cpu + 'static>() -> impl IntoView {
     //     UseDraggableOptions::default().initial_value(Position { x: 0.0, y: 0.0 }),
     // );
     view! {
-        <div style:width="38rem">
+        <div class=style::maincontainer style:width="38rem">
             <memory::MemEditor emu_read emu_write width=0x10 rows=10 />
             <disasm::Disassembler rows=10 emu_read emu_write />
             <registers::Registers emu_read emu_write />

@@ -1,6 +1,6 @@
 use emu_lib::cpu::i8080::I8080;
 use emu_lib::emulator::Emulator;
-use leptos::{component, view, IntoView, ReadSignal, WriteSignal};
+use leptos::{component, island, view, IntoView, ReadSignal, WriteSignal};
 
 #[component]
 pub fn registers(

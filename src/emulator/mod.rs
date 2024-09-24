@@ -1,11 +1,10 @@
 use crate::emulator::display::gen_dsp;
 use emu_lib::cpu::z80::Z80;
 use emu_lib::cpu::Cpu;
+use emu_lib::emulator::Emulator;
 use emu_lib::memory::memdevices::RAM;
 use emu_lib::memory::Memory;
-use leptos::{
-    component, create_signal, view, IntoView, ReadSignal, Signal, SignalWith, WriteSignal,
-};
+use leptos::{component, create_signal, island, provide_context, view, IntoView, ReadSignal, Signal, SignalWith, WriteSignal};
 use stylance::import_style;
 
 pub mod control;
@@ -18,32 +17,38 @@ import_style!(
     style,
     "table.module.scss"
 );
-#[component]
-pub fn emu_z80() -> impl IntoView {
-    emulator::<Z80>()
-}
 
-#[component]
-pub fn emu_i8080() -> impl IntoView {
-    emulator::<emu_lib::cpu::i8080::I8080>()
+#[derive(Clone)]
+pub struct EmuSignals{
+    pub read: ReadSignal<Emulator<Z80>>,
+    pub write: WriteSignal<Emulator<Z80>>
 }
+// #[component]
+// pub fn emu_z80() -> impl IntoView {
+//     emulator::<Z80>()
+// }
 
-pub fn emu_with<T: Cpu + 'static>(
-    emu_read: ReadSignal<emu_lib::emulator::Emulator<T>>,
-    emu_write: WriteSignal<emu_lib::emulator::Emulator<T>>,
+// #[component]
+// pub fn emu_i8080() -> impl IntoView {
+//     emulator::<emu_lib::cpu::i8080::I8080>()
+// }
+
+pub fn emu_with(
+    emu_read: ReadSignal<emu_lib::emulator::Emulator<Z80>>,
+    emu_write: WriteSignal<emu_lib::emulator::Emulator<Z80>>,
 ) -> impl IntoView {
     view! {
         <div style:width="38rem">
-            <memory::MemEditor emu_read emu_write width=0x10 rows=10 />
-            <disasm::Disassembler rows=10 emu_read emu_write />
-            <registers::Registers emu_read emu_write />
-            <control::Control emu_read emu_write />
+            <memory::MemEditor width=0x10 rows=10 />
+            <disasm::Disassembler rows=10 />
+            <registers::z80::Registers />
+            <control::Control />
         </div>
     }
 }
 
-// #[component]
-pub fn emulator<T: Cpu + 'static>() -> impl IntoView {
+#[island]
+pub fn emulator() -> impl IntoView {
     let res = (256, 192);
     // let refresh_rate = 50.08;
     let (dsp, dsp_view) = gen_dsp(res.0 * res.1, res.0 as usize, 2.0);
@@ -54,7 +59,7 @@ pub fn emulator<T: Cpu + 'static>() -> impl IntoView {
         0x10000 - res.0 as usize * res.1 as usize - 0x1000,
     )));
 
-    let mut emulator: emu_lib::emulator::Emulator<T> =
+    let mut emulator: emu_lib::emulator::Emulator<Z80> =
         emu_lib::emulator::Emulator::new_w_mem(memory);
     let rom_data = include_bytes!("../../color2.bin");
     // let test = "AAAAAAAABBBBBBBBCCCCCCCCDDDDDDDDEEEEEEEEFFFFFFFFGGGGGGGGHHHHHHHHIIIIIIII".to_string();//.repeat(5);
@@ -69,12 +74,13 @@ pub fn emulator<T: Cpu + 'static>() -> impl IntoView {
     //     el,
     //     UseDraggableOptions::default().initial_value(Position { x: 0.0, y: 0.0 }),
     // );
+    provide_context(EmuSignals{read:emu_read, write:emu_write});
     view! {
         <div class=style::maincontainer style:width="38rem">
-            <memory::MemEditor emu_read emu_write width=0x10 rows=10 />
-            <disasm::Disassembler rows=10 emu_read emu_write />
-            <registers::Registers emu_read emu_write />
-            <control::Control emu_read emu_write />
+            <memory::MemEditor width=0x10 rows=10 />
+            <disasm::Disassembler rows=10 />
+            <registers::z80::Registers/>
+            <control::Control />
             <div>{dsp_view(dsp_update)}</div>
         </div>
     }

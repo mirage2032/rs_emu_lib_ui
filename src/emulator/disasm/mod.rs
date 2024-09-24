@@ -1,5 +1,6 @@
-use super::style;
+use super::{style, EmuSignals};
 use emu_lib::cpu::Cpu;
+use emu_lib::cpu::z80::Z80;
 use emu_lib::emulator::Emulator;
 use emu_lib::memory::MemoryDevice;
 use leptos::logging::log;
@@ -7,13 +8,12 @@ use leptos::*;
 use stylance::classes;
 use web_sys::wasm_bindgen::JsCast;
 
-#[component]
-pub fn FollowPCSwitch<T: Cpu + 'static>(
-    emu_read: ReadSignal<Emulator<T>>,
-    start_pos_read: ReadSignal<Option<u16>>,
-    start_pos_write: WriteSignal<Option<u16>>,
+#[island]
+pub fn FollowPCSwitch(
 ) -> impl IntoView {
-    let elem_class = move || match start_pos_read.get() {
+    let emu_signals = expect_context::<EmuSignals>();
+    let start_pos_signals = expect_context::<StartPosSignals>();
+    let elem_class = move || match start_pos_signals.read.get() {
         Some(_) => style::tablebutton,
         None => style::tablebuttoninvert,
     };
@@ -26,10 +26,13 @@ pub fn FollowPCSwitch<T: Cpu + 'static>(
                         style:width="100%"
                         style:overflow="hidden"
                         on:click=move |_| {
-                            start_pos_write
+                            start_pos_signals
+                                .write
                                 .update(|v| {
                                     if v.is_none() {
-                                        *v = Some(emu_read.with(|emu| *emu.cpu.registers().pc))
+                                        *v = Some(
+                                            emu_signals.read.with(|emu| *emu.cpu.registers().pc),
+                                        )
                                     } else {
                                         *v = None
                                     }
@@ -38,7 +41,7 @@ pub fn FollowPCSwitch<T: Cpu + 'static>(
                     >
                         "Follow PC"
                     </button>
-                    <Show when=move || start_pos_read.get().is_some()>
+                    <Show when=move || start_pos_signals.read.get().is_some()>
                         <input
                             class=style::tablecount
                             style:outline="none"
@@ -53,20 +56,24 @@ pub fn FollowPCSwitch<T: Cpu + 'static>(
                                         let result = u16::from_str_radix(&element.value(), 16);
                                         match result {
                                             Ok(val) => {
-                                                start_pos_write.set(Some(val));
+                                                start_pos_signals.write.set(Some(val));
                                                 element.set_value(&format!("{:04X}", val));
                                             }
                                             Err(_) => {
                                                 log!("Invalid hex value");
                                                 element
-                                                    .set_value(&format!("{:04X}", start_pos_read().unwrap()));
+                                                    .set_value(
+                                                        &format!("{:04X}", start_pos_signals.read.get().unwrap()),
+                                                    );
                                             }
                                         }
                                     });
                             }
                             style:width="5ch"
                             maxlength=4
-                            prop:value=move || format!("{:04X}", start_pos_read().unwrap())
+                            prop:value=move || {
+                                format!("{:04X}", start_pos_signals.read.get().unwrap())
+                            }
                         />
                     </Show>
                 </div>
@@ -95,16 +102,16 @@ pub fn DisasmThead() -> impl IntoView {
     }
 }
 
-#[component]
-pub fn DisasmTr<T: Cpu + 'static>(
+#[island]
+pub fn DisasmTr(
     address: u16,
-    instruction: Result<Box<dyn emu_lib::cpu::instruction::ExecutableInstruction<T>>, String>,
-    emu_read: ReadSignal<Emulator<T>>,
-    emu_write: WriteSignal<Emulator<T>>,
+    // instruction: Result<Box<dyn emu_lib::cpu::instruction::ExecutableInstruction<Z80>>, String>,
+    instruction: Option<(String,String)>
 ) -> impl IntoView {
-    let class_is_bk = move || emu_read.with(|emu| emu.breakpoints.contains(&address));
+    let emu_signals = expect_context::<EmuSignals>();
+    let class_is_bk = move || emu_signals.read.with(|emu| emu.breakpoints.contains(&address));
     let switch_bk = move |_| {
-        emu_write.update(|emu| {
+        emu_signals.write.update(|emu| {
             if emu.breakpoints.contains(&address) {
                 emu.breakpoints.retain(|&x| x != address);
             } else {
@@ -112,7 +119,7 @@ pub fn DisasmTr<T: Cpu + 'static>(
             }
         });
     };
-    let class_is_pc = move || match emu_read.with(|emu| *emu.cpu.registers().pc == address) {
+    let class_is_pc = move || match emu_signals.read.with(|emu| *emu.cpu.registers().pc == address) {
         true => classes! {
             style::colorfocus,
             style::tableleft
@@ -132,26 +139,22 @@ pub fn DisasmTr<T: Cpu + 'static>(
                 <span>{format!("{:04X}", address)}</span>
             </td>
             {match instruction {
-                Ok(ins) => {
-                    let ins_hexstr = ins
-                        .to_bytes()
-                        .iter()
-                        .map(|b| format!("{:02X}", b))
-                        .collect::<String>();
+                Some((bytes, asm)) => {
                     view! {
                         <td class=style::tablecell style:text-align="left">
-                            <input style:width="10ch" prop:value=ins_hexstr />
+                            <input style:width="10ch" prop:value=bytes />
                         </td>
                         <td class=style::tablecell>
-                            <input prop:value=ins.to_string() />
+                            <input prop:value=asm />
                         </td>
                     }
                 }
-                Err(_) => {
+                None => {
                     view! {
                         <td class=style::tableleft>
                             <span>
-                                {emu_read
+                                {emu_signals
+                                    .read
                                     .with(|emu| { emu.memory.read_8(address) })
                                     .map(|b| format!("{:02X}", b))
                                     .unwrap_or_else(|_| "??".to_string())}
@@ -167,24 +170,26 @@ pub fn DisasmTr<T: Cpu + 'static>(
     }
 }
 
-#[component]
-pub fn DisasmTbody<T: Cpu + 'static>(
+#[island]
+pub fn DisasmTbody(
     rows: usize,
-    emu_read: ReadSignal<Emulator<T>>,
-    emu_write: WriteSignal<Emulator<T>>,
-    start_pos_read: ReadSignal<Option<u16>>,
 ) -> impl IntoView {
+    let emu_signals = expect_context::<EmuSignals>();
+    let start_pos_signals = expect_context::<StartPosSignals>();
     view! {
         <tbody>
             {
                 let rows = move || {
-                    let mut pc = start_pos_read
-                        .with(|val| val.unwrap_or(emu_read.with(|emu| *emu.cpu.registers().pc)))
-                        as usize;
+                    let mut pc = start_pos_signals
+                        .read
+                        .with(|val| {
+                            val.unwrap_or(emu_signals.read.with(|emu| *emu.cpu.registers().pc))
+                        }) as usize;
                     (0..rows)
                         .map(|_| {
                             let instruction = {
-                                emu_read
+                                emu_signals
+                                    .read
                                     .with(|emu| {
                                         emu.cpu.parser().ins_from_mem(&emu.memory, pc as u16)
                                     })
@@ -193,13 +198,24 @@ pub fn DisasmTbody<T: Cpu + 'static>(
                                 Ok(ins) => ins.common().length as usize,
                                 Err(_) => 1,
                             };
+                            let string_instruction = match &instruction {
+                                Ok(ins) => {
+                                    Some((
+                                        ins
+                                            .to_bytes()
+                                            .iter()
+                                            .map(|b| format!("{:02X}", b))
+                                            .collect::<String>(),
+                                        ins.to_string(),
+                                    ))
+                                }
+                                Err(_) => None,
+                            };
                             pc += size;
                             view! {
                                 <DisasmTr
                                     address=(pc - size) as u16
-                                    instruction
-                                    emu_read
-                                    emu_write
+                                    instruction=string_instruction
                                 />
                             }
                         })
@@ -211,20 +227,28 @@ pub fn DisasmTbody<T: Cpu + 'static>(
     }
 }
 
-#[component]
-pub fn Disassembler<T: Cpu + 'static>(
-    rows: usize,
-    emu_read: ReadSignal<Emulator<T>>,
-    emu_write: WriteSignal<Emulator<T>>,
+#[derive(Clone)]
+pub struct StartPosSignals {
+    pub read: ReadSignal<Option<u16>>,
+    pub write: WriteSignal<Option<u16>>
+}
+
+#[island]
+pub fn Disassembler(
+    rows: usize
 ) -> impl IntoView {
     let (start_pos_read, start_pos_write) = create_signal(None);
+    provide_context(StartPosSignals {
+        read: start_pos_read.clone(),
+        write: start_pos_write.clone()
+    });
     view! {
         <table class=style::table style:width="100%">
             <thead>
-                <FollowPCSwitch emu_read start_pos_read start_pos_write />
+                <FollowPCSwitch />
                 <DisasmThead />
             </thead>
-            <DisasmTbody rows emu_read emu_write start_pos_read />
+            <DisasmTbody rows />
         </table>
     }
 }

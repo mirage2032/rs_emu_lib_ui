@@ -1,27 +1,27 @@
-use super::style;
+use super::{style, EmuSignals};
 use emu_lib::cpu::instruction::ExecutableInstruction;
 use emu_lib::cpu::Cpu;
 use emu_lib::emulator::Emulator;
 use leptos::leptos_dom::helpers::IntervalHandle;
 use leptos::*;
 use std::time::Duration;
+use emu_lib::cpu::z80::Z80;
 use web_sys::js_sys;
 use web_sys::wasm_bindgen::closure::Closure;
 use web_sys::wasm_bindgen::{JsCast, JsValue};
 
-#[component]
-pub fn Control<T: Cpu + 'static>(
-    emu_read: ReadSignal<Emulator<T>>,
-    emu_write: WriteSignal<Emulator<T>>,
+#[island]
+pub fn Control(
 ) -> impl IntoView {
+    let emu_signals = expect_context::<EmuSignals>();
     let halted_class = move || {
-        emu_read.with(|emu| match emu.cpu.halted() {
+        emu_signals.read.with(|emu| match emu.cpu.halted() {
             true => style::tablebuttoninvert,
             false => style::tablebutton,
         })
     };
     let switch_halt = move || {
-        emu_write.update(|emu| {
+        emu_signals.write.update(|emu| {
             emu.cpu.set_halted(!emu.cpu.halted());
         });
     };
@@ -34,7 +34,7 @@ pub fn Control<T: Cpu + 'static>(
         }
     };
     let step = move || {
-        emu_write.update(|emu| {
+        emu_signals.write.update(|emu| {
             if let Err(e) = emu.run_ticks(
                 300000.0,
                 &None as &Option<fn(&mut _, &dyn ExecutableInstruction<_>)>,
@@ -67,7 +67,8 @@ pub fn Control<T: Cpu + 'static>(
                     class=style::tablebutton
                     style:padding="0.3rem"
                     on:click=move |_| {
-                        emu_write
+                        emu_signals
+                            .write
                             .update(|emu| {
                                 match emu.step() {
                                     Ok(_) => {}
@@ -116,7 +117,8 @@ pub fn Control<T: Cpu + 'static>(
                                                     let array_buffer = reader_clone.result().unwrap();
                                                     let uint8_array = js_sys::Uint8Array::new(&array_buffer);
                                                     let file_content = uint8_array.to_vec();
-                                                    emu_write
+                                                    emu_signals
+                                                        .write
                                                         .update(|emu| {
                                                             emu.memory.load(&file_content).unwrap();
                                                         });

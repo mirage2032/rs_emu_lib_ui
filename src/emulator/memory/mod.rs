@@ -1,16 +1,15 @@
 use super::{style, EmuSignals};
-use emu_lib::cpu::Cpu;
+use emu_lib::cpu::z80::Z80;
 use emu_lib::emulator::Emulator;
 use emu_lib::memory::MemoryDevice;
 use leptos::logging::{log, warn};
 use leptos::*;
 use std::borrow::BorrowMut;
-use emu_lib::cpu::z80::Z80;
 use web_sys::wasm_bindgen::JsCast;
 use web_sys::HtmlInputElement;
-use crate::emulator::disasm::StartPosSignals;
+use leptos::prelude::*;     // Added
 
-#[island]
+#[component]
 fn MemThead(width: usize) -> impl IntoView {
     let address_signals = expect_context::<AddressReadSignals>();
     let suffix = move |offset: u16| {
@@ -23,7 +22,7 @@ fn MemThead(width: usize) -> impl IntoView {
             format!("{:01X}", offset)
         }
     };
-    view! {
+    let view = view! {
         <thead>
             <tr>
                 <th class=style::tableleft></th>
@@ -38,13 +37,12 @@ fn MemThead(width: usize) -> impl IntoView {
                     .collect_view()}
             </tr>
         </thead>
-    }
+    };
+    Some(view)
 }
 
-#[island]
-fn MemCell(
-    index: usize,
-) -> impl IntoView {
+#[component]
+fn MemCell(index: usize) -> impl IntoView {
     let emu_signals = expect_context::<EmuSignals>();
     let i_getval = move || -> Result<u8, &str> {
         if index >= emu_signals.read.with(|emu| emu.memory.size()) {
@@ -82,7 +80,7 @@ fn MemCell(
         }
     };
 
-    view! {
+    let view = view! {
         <input
             maxlength=2
             prop:value=move || s_getval()
@@ -104,41 +102,30 @@ fn MemCell(
                     });
             }
         />
-    }
+    };
+    Some(view)
 }
 
-#[island]
-fn MemThs(
-    width: usize,
-    row_start: usize,
-) -> impl IntoView {
+#[component]
+fn MemThs(width: usize, row_start: usize) -> impl IntoView {
     view! {
-        {(0..width)
-            .map(move |i| {
-                let index = row_start + i;
-                view! {
-                    <th class=style::tablecell>
-                        <MemCell index />
-                    </th>
-                }
-            })
-            .collect_view()}
+        <For each=move || { row_start..(row_start + width) } key=move |index| *index let:index>
+            <th class=style::tablecell>
+                <MemCell index />
+            </th>
+        </For>
     }
 }
 
-#[island]
-fn MemTrCounter(
-    width: usize,
-) -> impl IntoView {
+#[component]
+fn MemTrCounter(width: usize) -> impl IntoView {
     let emu_signals = expect_context::<EmuSignals>();
     let address_signals = expect_context::<AddressReadSignals>();
     let memth = move || {
         let row_start = address_signals.read.get() as usize;
-        view! {
-            <MemThs width row_start />
-        }
+        view! { <MemThs width row_start /> }
     };
-    view! {
+    let view = view! {
         <tr>
             <th class=style::tableleft style:display="flex" style:border="none">
                 <span>"0x"</span>
@@ -151,9 +138,7 @@ fn MemTrCounter(
                         event
                             .target()
                             .map(|target| {
-                                let element = target
-                                    .dyn_into::<HtmlInputElement>()
-                                    .unwrap();
+                                let element = target.dyn_into::<HtmlInputElement>().unwrap();
                                 let elem_val = &element.value();
                                 let hexval = u16::from_str_radix(elem_val, 16);
                                 match hexval {
@@ -173,14 +158,12 @@ fn MemTrCounter(
             </th>
             {memth}
         </tr>
-    }
+    };
+    Some(view)
 }
 
-#[island]
-fn MemTr(
-    width: usize,
-    row_start: usize,
-) -> impl IntoView {
+#[component]
+fn MemTr(width: usize, row_start: usize) -> impl IntoView {
     view! {
         <tr>
             <th class=style::tableleft>
@@ -191,20 +174,18 @@ fn MemTr(
     }
 }
 
-#[island]
-pub fn MemTbody(
-    width: usize,
-    rows: usize
-) -> impl IntoView {
+#[component]
+pub fn MemTbody(width: usize, rows: usize) -> impl IntoView {
     let emu_signals = expect_context::<EmuSignals>();
     let address_signals = expect_context::<AddressReadSignals>();
     let addr_start = move || address_signals.read.get() as usize + width;
     let addr_end = move || {
-        emu_signals.read
+        emu_signals
+            .read
             .with(|emu| emu.memory.size())
             .min(addr_start() + width * rows)
     };
-    view! {
+    let view = view! {
         <tbody>
             <MemTrCounter width />
             <For
@@ -215,29 +196,30 @@ pub fn MemTbody(
                 <MemTr width row_start />
             </For>
         </tbody>
-    }
+    };
+    Some(view)
 }
 
 #[derive(Clone)]
 pub struct AddressReadSignals {
     pub read: ReadSignal<u16>,
-    pub write: WriteSignal<u16>
+    pub write: WriteSignal<u16>,
 }
 
-#[island]
-pub fn MemEditor(
-    width: usize,
-    rows: usize,
-) -> impl IntoView {
+#[component]
+pub fn MemEditor(width: usize, rows: usize) -> impl IntoView {
+    let emu_signals = expect_context::<EmuSignals>();
+
     let (address_read, address_write) = create_signal(0);
     provide_context(AddressReadSignals {
         read: address_read.clone(),
-        write: address_write.clone()
+        write: address_write.clone(),
     });
-    view! {
+    let view = view! {
         <table style:width="100%" class=style::table>
             <MemThead width />
             <MemTbody width rows />
         </table>
-    }
+    };
+    Some(view)
 }

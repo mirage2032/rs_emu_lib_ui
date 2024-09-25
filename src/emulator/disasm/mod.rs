@@ -1,16 +1,13 @@
 use super::{style, EmuSignals};
 use emu_lib::cpu::Cpu;
-use emu_lib::cpu::z80::Z80;
-use emu_lib::emulator::Emulator;
 use emu_lib::memory::MemoryDevice;
 use leptos::logging::log;
-use leptos::*;
+use leptos::prelude::*;
 use stylance::classes;
 use web_sys::wasm_bindgen::JsCast;
 
-#[island]
-pub fn FollowPCSwitch(
-) -> impl IntoView {
+#[component]
+pub fn FollowPCSwitch() -> impl IntoView {
     let emu_signals = expect_context::<EmuSignals>();
     let start_pos_signals = expect_context::<StartPosSignals>();
     let elem_class = move || match start_pos_signals.read.get() {
@@ -102,14 +99,18 @@ pub fn DisasmThead() -> impl IntoView {
     }
 }
 
-#[island]
+#[component]
 pub fn DisasmTr(
     address: u16,
     // instruction: Result<Box<dyn emu_lib::cpu::instruction::ExecutableInstruction<Z80>>, String>,
-    instruction: Option<(String,String)>
+    instruction: Option<(String, String)>,
 ) -> impl IntoView {
     let emu_signals = expect_context::<EmuSignals>();
-    let class_is_bk = move || emu_signals.read.with(|emu| emu.breakpoints.contains(&address));
+    let class_is_bk = move || {
+        emu_signals
+            .read
+            .with(|emu| emu.breakpoints.contains(&address))
+    };
     let switch_bk = move |_| {
         emu_signals.write.update(|emu| {
             if emu.breakpoints.contains(&address) {
@@ -119,7 +120,10 @@ pub fn DisasmTr(
             }
         });
     };
-    let class_is_pc = move || match emu_signals.read.with(|emu| *emu.cpu.registers().pc == address) {
+    let class_is_pc = move || match emu_signals
+        .read
+        .with(|emu| *emu.cpu.registers().pc == address)
+    {
         true => classes! {
             style::colorfocus,
             style::tableleft
@@ -138,7 +142,8 @@ pub fn DisasmTr(
             <td class=class_is_pc>
                 <span>{format!("{:04X}", address)}</span>
             </td>
-            {match instruction {
+            {
+                match instruction {
                 Some((bytes, asm)) => {
                     view! {
                         <td class=style::tablecell style:text-align="left">
@@ -147,7 +152,7 @@ pub fn DisasmTr(
                         <td class=style::tablecell>
                             <input prop:value=asm />
                         </td>
-                    }
+                    }.into_any()
                 }
                 None => {
                     view! {
@@ -163,17 +168,15 @@ pub fn DisasmTr(
                         <td class=style::tablecell>
                             <span>"UNKNOWN"</span>
                         </td>
-                    }
+                    }.into_any()
                 }
             }}
         </tr>
     }
 }
 
-#[island]
-pub fn DisasmTbody(
-    rows: usize,
-) -> impl IntoView {
+#[component]
+pub fn DisasmTbody(rows: usize) -> impl IntoView {
     let emu_signals = expect_context::<EmuSignals>();
     let start_pos_signals = expect_context::<StartPosSignals>();
     view! {
@@ -230,17 +233,15 @@ pub fn DisasmTbody(
 #[derive(Clone)]
 pub struct StartPosSignals {
     pub read: ReadSignal<Option<u16>>,
-    pub write: WriteSignal<Option<u16>>
+    pub write: WriteSignal<Option<u16>>,
 }
 
-#[island]
-pub fn Disassembler(
-    rows: usize
-) -> impl IntoView {
+#[component]
+pub fn Disassembler(rows: usize) -> impl IntoView {
     let (start_pos_read, start_pos_write) = create_signal(None);
     provide_context(StartPosSignals {
         read: start_pos_read.clone(),
-        write: start_pos_write.clone()
+        write: start_pos_write.clone(),
     });
     view! {
         <table class=style::table style:width="100%">

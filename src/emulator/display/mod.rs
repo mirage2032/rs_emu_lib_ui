@@ -1,12 +1,12 @@
 use emu_lib::memory::MemoryDevice;
 use leptos::html::Canvas;
 use leptos::logging::log;
-use leptos::{create_effect, create_node_ref, view, HtmlElement, Signal, SignalWith};
+use leptos::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 use web_sys::wasm_bindgen::JsCast;
-use web_sys::CanvasRenderingContext2d;
+use web_sys::{CanvasRenderingContext2d, HtmlElement};
 
 pub struct CanvasDisplay {
     pub buffer: Arc<Mutex<Vec<u8>>>,
@@ -49,17 +49,17 @@ pub fn gen_dsp(
     size: u16,
     width: usize,
     scale: f64,
-) -> (CanvasDisplay, impl Fn(Signal<()>) -> HtmlElement<Canvas>) {
+) -> (CanvasDisplay, impl Fn(Signal<()>) -> HtmlElement) {
     let dsp = CanvasDisplay::new(size);
     let height = size.div_ceil(width as u16) as usize;
     let buffer = dsp.buffer.clone();
-    let display = move |dsp_update: Signal<()>| -> HtmlElement<Canvas> {
+    let display = move |dsp_update: Signal<()>| -> HtmlElement {
         let canvas_ref = create_node_ref::<Canvas>();
         let canvas = Rc::new(RefCell::new(None));
         let ctx = Rc::new(RefCell::new(None));
         let buffer = buffer.clone();
         create_effect(move |_| {
-            dsp_update.track();
+            dsp_update.get();
             if canvas.borrow().is_none() {
                 if let Some(can) = canvas_ref.get() {
                     canvas.replace(Some(can));

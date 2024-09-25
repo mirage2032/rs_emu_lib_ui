@@ -1,5 +1,4 @@
-use emu_lib::cpu::z80::Z80;
-use leptos::mount_to_body;
+use leptos::mount::mount_to_body;
 
 pub mod emulator;
 

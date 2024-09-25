@@ -12,9 +12,9 @@ debug = true
 [dependencies]
 emu_lib = { git = "https://github.com/mirage2032/rs_emu_lib.git" }
 console_error_panic_hook = "0.1.7"
-leptos = { version = "0.6.13", features = ["nightly","experimental-islands"] }
-leptos-use = {version= "0.13.4"}
-leptos_meta = { version = "0.6.15", features = ["nightly"] }
+leptos = { version = "0.7.0-beta5", features = ["nightly","experimental-islands"] }
+leptos-use = {version= "0.14.0-beta4"}
+leptos_meta = { version = "0.7.0-beta5" }
 stylance = { version="0.5.1", features = ["nightly"] }
 log = "0.4.22"
 tokio = { version = "1.40.0", features = ["time"] }
@@ -32,9 +32,9 @@ features = [
 
 [features]
 default = ["csr"]
-hydrate = ["leptos/hydrate", "leptos_meta/hydrate"]
+hydrate = ["leptos/hydrate"]
 ssr = ["leptos/ssr", "leptos_meta/ssr","leptos-use/ssr"]
-csr = ["leptos/csr", "leptos_meta/csr"]
+csr = ["leptos/csr"]
 
 
 [package.metadata.stylance]

@@ -5,13 +5,14 @@ use emu_lib::memory::memdevices::RAM;
 use emu_lib::memory::Memory;
 use leptos::prelude::*;
 use stylance::import_style;
-// use crate::emulator::display::gen_dsp;
+
+pub mod display;
 
 pub mod control;
-        pub mod disasm;
-        // pub mod display;
-        pub mod memory;
-        pub mod registers;
+pub mod disasm;
+// pub mod display;
+pub mod memory;
+pub mod registers;
 import_style!(
     #[allow(dead_code)]
     style,
@@ -45,27 +46,24 @@ pub fn emu_with(
     emu_write: WriteSignal<emu_lib::emulator::Emulator<Z80>>,
 ) -> impl IntoView {
     view! {
-        <div style:width="38rem">// <memory::MemEditor width=0x10 rows=10 />
-        // <disasm::Disassembler rows=10 />
         // <registers::z80::   Registers />
-        // <control::Control />
+        <div style:width="38rem">// <control::Control />
         </div>
     }
 }
 #[island]
 pub fn Emulator() -> impl IntoView {
     let res = (256, 192);
-    // let (dsp, dsp_view) = gen_dsp(res.0 * res.1, res.0 as usize, 2.0);
-    // let mut memory = Memory::new();
-    // memory.add_device(Box::new(RAM::new(0x1000)));
-    // memory.add_device(Box::new(dsp));
-    // memory.add_device(Box::new(RAM::new(
-    //     0x10000 - res.0 as usize * res.1 as usize - 0x1000,
-    // )));
-    let memory = Memory::new_full_ram();
+    let (dsp, dsp_view) = display::gen_dsp(res.0 * res.1, res.0 as usize, 2.0);
+    let mut memory = Memory::new();
+    memory.add_device(Box::new(RAM::new(0x1000)));
+    memory.add_device(Box::new(dsp));
+    memory.add_device(Box::new(RAM::new(
+        0x10000 - res.0 as usize * res.1 as usize - 0x1000,
+    )));
+    // let memory = Memory::new_full_ram();
     let emulator: Emulator<Z80> = Emulator::new_w_mem(memory);
     let rom_data = include_bytes!("../../color2.bin");
-    log!("Dada");
     // let test = "AAAAAAAABBBBBBBBCCCCCCCCDDDDDDDDEEEEEEEEFFFFFFFFGGGGGGGGHHHHHHHHIIIIIIII".to_string();//.repeat(5);
     // emulator.memory.load(test.as_bytes()).unwrap();
     // emulator.memory.load(rom_data).unwrap();
@@ -77,7 +75,7 @@ pub fn Emulator() -> impl IntoView {
     //     UseDraggableOptions::default().initial_value(Position { x: 0.0, y: 0.0 }),
     // );
     let emu_signals = EmuSignals::new(emulator);
-    // let dsp_update = Signal::derive(move || emu_signals.read.with(|_| ()));
+    let dsp_update = Signal::derive(move || emu_signals.read.with(|_| ()));
     provide_context(emu_signals);
     view! {
         <div class=style::maincontainer style:width="38rem">
@@ -85,7 +83,7 @@ pub fn Emulator() -> impl IntoView {
             <disasm::Disassembler rows=10 />
             <registers::z80::Registers />
             <control::Control />
-        // <div>{dsp_view(dsp_update)}</div>
+            <div>{dsp_view(dsp_update)}</div>
         </div>
     }
 }

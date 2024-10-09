@@ -142,8 +142,7 @@ pub fn DisasmTr(
             <td class=class_is_pc>
                 <span>{format!("{:04X}", address)}</span>
             </td>
-            {
-                match instruction {
+            {match instruction {
                 Some((bytes, asm)) => {
                     view! {
                         <td class=style::tablecell style:text-align="left">
@@ -152,7 +151,8 @@ pub fn DisasmTr(
                         <td class=style::tablecell>
                             <input prop:value=asm />
                         </td>
-                    }.into_any()
+                    }
+                        .into_any()
                 }
                 None => {
                     view! {
@@ -168,7 +168,8 @@ pub fn DisasmTr(
                         <td class=style::tablecell>
                             <span>"UNKNOWN"</span>
                         </td>
-                    }.into_any()
+                    }
+                        .into_any()
                 }
             }}
         </tr>

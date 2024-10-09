@@ -1,7 +1,7 @@
 use crate::emulator::registers::Register;
 use crate::emulator::EmuSignals;
-use leptos::{component,view, IntoView};
 use leptos::prelude::*;
+use leptos::{component, view, IntoView};
 
 #[component]
 pub fn registers() -> impl IntoView {

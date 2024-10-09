@@ -2,6 +2,7 @@ use emu_lib::memory::MemoryDevice;
 use leptos::html::Canvas;
 use leptos::logging::log;
 use leptos::prelude::*;
+use leptos::tachys::view::any_view::AnyView;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};
@@ -49,11 +50,11 @@ pub fn gen_dsp(
     size: u16,
     width: usize,
     scale: f64,
-) -> (CanvasDisplay, impl Fn(Signal<()>) -> HtmlElement) {
+) -> (CanvasDisplay, impl Fn(Signal<()>) -> AnyView) {
     let dsp = CanvasDisplay::new(size);
     let height = size.div_ceil(width as u16) as usize;
     let buffer = dsp.buffer.clone();
-    let display = move |dsp_update: Signal<()>| -> HtmlElement {
+    let display = move |dsp_update: Signal<()>| -> AnyView {
         let canvas_ref = create_node_ref::<Canvas>();
         let canvas = Rc::new(RefCell::new(None));
         let ctx = Rc::new(RefCell::new(None));
@@ -110,7 +111,7 @@ pub fn gen_dsp(
                 }
             }
         });
-        view! { <canvas node_ref=canvas_ref /> }
+        view! { <canvas node_ref=canvas_ref /> }.into_any()
         //END
     };
     (dsp, display)

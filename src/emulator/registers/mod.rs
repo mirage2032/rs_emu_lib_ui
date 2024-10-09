@@ -19,6 +19,19 @@ fn Register(
     get: Signal<String>,
     set: impl Fn(&str) -> Result<(), std::num::ParseIntError> + 'static,
 ) -> impl IntoView {
+    let change = move |event|
+        {
+            let val = event_target_value(&event);
+            match set(&val) {
+                Ok(_) => {}
+                Err(_) => {
+                    warn!("Invalid hex value: {}",val);
+                    event_target::<HtmlInputElement>(&event)
+                        .borrow_mut()
+                        .set_value(&get());
+                }
+            }
+        };
     view! {
         <table class=style::table>
             <thead>
@@ -31,20 +44,10 @@ fn Register(
             <tbody>
                 <tr>
                     <th class=style::tablecell>
-                        <input style:width="100%" maxlength=maxlength />
-                    // on:change=move |ev| {
-                    // let val = event_target_value(&ev);
-                    // match set(&val) {
-                    // Ok(_) => {}
-                    // Err(_) => {
-                    // warn!("Invalid hex value: {}",val);
-                    // event_target::<HtmlInputElement>(&ev)
-                    // .borrow_mut()
-                    // .set_value(&get());
-                    // }
-                    // }
-                    // }
-                    // prop:value=get
+                        <input style:width="100%" maxlength=maxlength
+                        on:change=change
+                        prop:value=get
+                        />
                     </th>
                 </tr>
             </tbody>

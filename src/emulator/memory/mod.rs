@@ -3,11 +3,11 @@ use emu_lib::cpu::z80::Z80;
 use emu_lib::emulator::Emulator;
 use emu_lib::memory::MemoryDevice;
 use leptos::logging::{log, warn};
+use leptos::prelude::*;
 use leptos::*;
 use std::borrow::BorrowMut;
 use web_sys::wasm_bindgen::JsCast;
-use web_sys::HtmlInputElement;
-use leptos::prelude::*;     // Added
+use web_sys::HtmlInputElement; // Added
 
 #[component]
 fn MemThead(width: usize) -> impl IntoView {
